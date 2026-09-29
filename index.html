@@ -1,1609 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<title>STRIPZO — Building What Comes Next</title>
-
-<meta
-  name="description"
-  content="STRIPZO is an independent digital organisation building, experimenting and evolving ideas."
-/>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-<style>
-:root {
-  --bg: #050505;
-  --fg: #f5f5f5;
-  --muted: rgba(245,245,245,.45);
-  --line: rgba(255,255,255,.12);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body {
-  width: 100%;
-  min-height: 100%;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-body {
-  overflow-x: hidden;
-}
-
-body::-webkit-scrollbar {
-  width: 0;
-}
-
-canvas {
-  display: block;
-}
-
-/* -------------------------------------------------------
-   3D WORLD
-------------------------------------------------------- */
-
-#world {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-}
-
-/* -------------------------------------------------------
-   UI
-------------------------------------------------------- */
-
-.ui {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.nav {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 28px 38px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  mix-blend-mode: difference;
-}
-
-.logo {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: .22em;
-}
-
-.nav-right {
-  font-size: 9px;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  opacity: .55;
-}
-
-.founder {
-  position: absolute;
-  left: 38px;
-  bottom: 28px;
-
-  font-size: 9px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-
-  color: rgba(255,255,255,.38);
-}
-
-.founder span {
-  color: white;
-}
-
-.progress {
-  position: absolute;
-  right: 38px;
-  top: 50%;
-  transform: translateY(-50%);
-
-  width: 1px;
-  height: 90px;
-
-  background: rgba(255,255,255,.12);
-}
-
-.progress-fill {
-  width: 100%;
-  height: 0%;
-  background: white;
-}
-
-.scroll-label {
-  position: absolute;
-  right: 22px;
-  bottom: 28px;
-
-  writing-mode: vertical-rl;
-
-  font-size: 8px;
-  letter-spacing: .25em;
-  text-transform: uppercase;
-
-  opacity: .35;
-}
-
-/* -------------------------------------------------------
-   TYPOGRAPHY
-------------------------------------------------------- */
-
-.copy {
-  position: absolute;
-
-  left: 50%;
-  top: 50%;
-
-  width: min(1000px, 90vw);
-
-  transform: translate(-50%, -50%);
-
-  text-align: center;
-
-  opacity: 0;
-  pointer-events: none;
-}
-
-.copy.visible {
-  opacity: 1;
-}
-
-.eyebrow {
-  margin-bottom: 26px;
-
-  font-size: 10px;
-  letter-spacing: .28em;
-
-  text-transform: uppercase;
-
-  color: rgba(255,255,255,.48);
-}
-
-.title {
-  font-size: clamp(70px, 15vw, 190px);
-
-  line-height: .8;
-
-  letter-spacing: -.085em;
-
-  font-weight: 700;
-}
-
-.subtitle {
-  max-width: 480px;
-
-  margin: 34px auto 0;
-
-  font-size: 14px;
-
-  line-height: 1.7;
-
-  color: var(--muted);
-}
-
-.big-word {
-  font-size: clamp(65px, 12vw, 160px);
-
-  line-height: .82;
-
-  letter-spacing: -.075em;
-
-  font-weight: 700;
-}
-
-.micro {
-  margin-top: 28px;
-
-  font-size: 9px;
-
-  letter-spacing: .24em;
-
-  text-transform: uppercase;
-
-  color: rgba(255,255,255,.38);
-}
-
-/* -------------------------------------------------------
-   SCROLL SPACE
-------------------------------------------------------- */
-
-#scroll-space {
-  height: 1100vh;
-}
-
-/* -------------------------------------------------------
-   NOISE
-------------------------------------------------------- */
-
-.noise {
-  position: fixed;
-  inset: 0;
-
-  z-index: 20;
-
-  pointer-events: none;
-
-  opacity: .035;
-
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-/* -------------------------------------------------------
-   MOBILE
-------------------------------------------------------- */
-
-@media(max-width: 700px) {
-
-  .nav {
-    padding: 20px;
-  }
-
-  .nav-right {
-    display: none;
-  }
-
-  .founder {
-    left: 20px;
-    bottom: 20px;
-  }
-
-  .progress {
-    right: 20px;
-  }
-
-  .scroll-label {
-    right: 8px;
-  }
-
-  .subtitle {
-    font-size: 13px;
-    max-width: 330px;
-  }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STRIPZO Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      --bg: #070709;
+      --fg: #f1f3f5;
+      --muted: #52525b;
+      --accent-subtle: #a1a1aa;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'Space Grotesk', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+    html, body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      width: 100vw;
+    }
+
+    #webgl-stage {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      padding: 32px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      mix-blend-mode: difference;
+    }
+
+    .brand-id {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.3em;
+      color: var(--fg);
+    }
+
+    .state-indicator {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    #spatial-viewport {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+
+    .spatial-state {
+      height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 10vw;
+      position: relative;
+    }
+
+    .giant-title {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(3.5rem, 11vw, 10rem);
+      line-height: 0.85;
+      letter-spacing: -0.04em;
+      color: var(--fg);
+      text-transform: uppercase;
+      transition: opacity 0.5s ease;
+    }
+
+    .editorial-statement {
+      font-size: clamp(1.1rem, 2vw, 1.8rem);
+      font-weight: 300;
+      line-height: 1.4;
+      max-width: 680px;
+      color: var(--accent-subtle);
+      margin-top: 32px;
+      letter-spacing: -0.01em;
+    }
+
+    .project-node {
+      margin-top: 40px;
+      border-left: 2px solid var(--fg);
+      padding-left: 24px;
+    }
+
+    .project-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .project-name {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .project-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-top: 8px;
+      max-width: 420px;
+    }
+
+    .founder-credit {
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-top: 40px;
+      text-transform: uppercase;
+    }
+
+    .scroll-hint {
+      position: fixed;
+      bottom: 32px;
+      right: 48px;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      color: var(--muted);
+      z-index: 100;
+      mix-blend-mode: difference;
+    }
+
+    @media (max-width: 768px) {
+      .top-bar { padding: 24px; }
+      .spatial-state { padding: 0 6vw; }
+      .scroll-hint { right: 24px; bottom: 24px; }
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- =====================================================
-     3D WORLD
-===================================================== -->
-
-<div id="world"></div>
-
-
-<!-- =====================================================
-     UI
-===================================================== -->
-
-<div class="ui">
-
-  <div class="nav">
-    <div class="logo">STRIPZO</div>
-
-    <div class="nav-right">
-      Independent Digital Organisation
-    </div>
-  </div>
-
-
-  <div class="founder">
-    Founded by <span>Yashas</span>
-  </div>
-
-
-  <div class="progress">
-    <div class="progress-fill"></div>
-  </div>
-
-
-  <div class="scroll-label">
-    Scroll to explore
-  </div>
-
-
-  <!-- HERO -->
-
-  <div class="copy hero">
-
-    <div class="eyebrow">
-      Independent Digital Organisation
-    </div>
-
-    <div class="title">
-      STRIPZO
-    </div>
-
-    <div class="subtitle">
-      We build ideas, experiment with possibilities,
-      and evolve them into things that didn't exist before.
-    </div>
-
-  </div>
-
-
-  <!-- BUILD -->
-
-  <div class="copy build">
-
-    <div class="eyebrow">
-      01 — BUILD
-    </div>
-
-    <div class="big-word">
-      BUILD.
-    </div>
-
-    <div class="micro">
-      Start with an idea.
-    </div>
-
-  </div>
-
-
-  <!-- BREAK -->
-
-  <div class="copy break">
-
-    <div class="eyebrow">
-      02 — BREAK
-    </div>
-
-    <div class="big-word">
-      BREAK.
-    </div>
-
-    <div class="micro">
-      Question everything.
-    </div>
-
-  </div>
-
-
-  <!-- EVOLVE -->
-
-  <div class="copy evolve">
-
-    <div class="eyebrow">
-      03 — EVOLVE
-    </div>
-
-    <div class="big-word">
-      EVOLVE.
-    </div>
-
-    <div class="micro">
-      Make something better.
-    </div>
-
-  </div>
-
-
-  <!-- NO FIXED FORM -->
-
-  <div class="copy form">
-
-    <div class="eyebrow">
-      No fixed form.
-    </div>
-
-    <div class="big-word">
-      ONE IDEA.
-    </div>
-
-    <div class="micro">
-      Infinite possibilities.
-    </div>
-
-  </div>
-
-
-  <!-- PROJECT -->
-
-  <div class="copy project">
-
-    <div class="eyebrow">
-      A STRIPZO PROJECT
-    </div>
-
-    <div class="big-word">
-      PLAYZO
-    </div>
-
-    <div class="micro">
-      One experiment among many.
-    </div>
-
-  </div>
-
-
-  <!-- FUTURE -->
-
-  <div class="copy future">
-
-    <div class="eyebrow">
-      The story isn't finished.
-    </div>
-
-    <div class="big-word">
-      MORE.
-    </div>
-
-    <div class="subtitle">
-      Some ideas are being built.
-      Some are being tested.
-      Some don't have names yet.
-    </div>
-
-  </div>
-
-
-  <!-- FINAL -->
-
-  <div class="copy final">
-
-    <div class="eyebrow">
-      STRIPZO
-    </div>
-
-    <div class="big-word">
-      BUILD.<br>
-      EXPERIMENT.<br>
-      EVOLVE.
-    </div>
-
-    <div class="micro">
-      Building what comes next.
-    </div>
-
-  </div>
-
-</div>
-
-
-<div class="noise"></div>
-
-<div id="scroll-space"></div>
-
-
-<script>
-
-/* =====================================================
-   SETUP
-===================================================== */
-
-gsap.registerPlugin(ScrollTrigger);
-
-
-const world =
-  document.getElementById("world");
-
-
-const scene =
-  new THREE.Scene();
-
-
-scene.background =
-  new THREE.Color(0x050505);
-
-
-const camera =
-  new THREE.PerspectiveCamera(
-    50,
-    window.innerWidth / window.innerHeight,
-    .1,
-    200
-  );
-
-
-camera.position.set(
-  0,
-  0,
-  9
-);
-
-
-const renderer =
-  new THREE.WebGLRenderer({
-    antialias: true,
-    powerPreference: "high-performance"
-  });
-
-
-renderer.setPixelRatio(
-  Math.min(window.devicePixelRatio, 2)
-);
-
-
-renderer.setSize(
-  window.innerWidth,
-  window.innerHeight
-);
-
-
-renderer.outputEncoding =
-  THREE.sRGBEncoding;
-
-
-world.appendChild(renderer.domElement);
-
-
-/* =====================================================
-   MASTER WORLD
-===================================================== */
-
-const universe =
-  new THREE.Group();
-
-scene.add(universe);
-
-
-/* =====================================================
-   MAIN MORPHING OBJECT
-===================================================== */
-
-const object =
-  new THREE.Group();
-
-universe.add(object);
-
-
-/* -----------------------------------------------------
-   MATERIAL
------------------------------------------------------ */
-
-const material =
-  new THREE.MeshPhysicalMaterial({
-    color: 0x111111,
-    metalness: .95,
-    roughness: .17,
-    clearcoat: 1,
-    clearcoatRoughness: .08
-  });
-
-
-/* -----------------------------------------------------
-   SPHERE
------------------------------------------------------ */
-
-const sphere =
-  new THREE.Mesh(
-    new THREE.IcosahedronGeometry(
-      1.55,
-      4
-    ),
-    material
-  );
-
-
-object.add(sphere);
-
-
-/* -----------------------------------------------------
-   CUBE
------------------------------------------------------ */
-
-const cube =
-  new THREE.Mesh(
-    new THREE.BoxGeometry(
-      2.7,
-      2.7,
-      2.7,
-      5,
-      5,
-      5
-    ),
-    material
-  );
-
-
-cube.scale.setScalar(.001);
-
-object.add(cube);
-
-
-/* -----------------------------------------------------
-   TORUS KNOT
------------------------------------------------------ */
-
-const knot =
-  new THREE.Mesh(
-    new THREE.TorusKnotGeometry(
-      1.2,
-      .28,
-      160,
-      32,
-      2,
-      3
-    ),
-    material
-  );
-
-
-knot.scale.setScalar(.001);
-
-object.add(knot);
-
-
-/* -----------------------------------------------------
-   TETRAHEDRON
------------------------------------------------------ */
-
-const tetra =
-  new THREE.Mesh(
-    new THREE.TetrahedronGeometry(
-      1.9,
-      3
-    ),
-    material
-  );
-
-
-tetra.scale.setScalar(.001);
-
-object.add(tetra);
-
-
-/* =====================================================
-   INNER ENERGY
-===================================================== */
-
-const inner =
-  new THREE.Mesh(
-    new THREE.IcosahedronGeometry(
-      .65,
-      2
-    ),
-    new THREE.MeshBasicMaterial({
-      color: 0xffffff,
+  <div id="webgl-stage"></div>
+
+  <header class="top-bar">
+    <div class="brand-id">STRIPZO</div>
+    <div class="state-indicator" id="state-label">01 / ORIGIN</div>
+  </header>
+
+  <div class="scroll-hint">SCROLL TO TRANSFORM</div>
+
+  <main id="spatial-viewport">
+    <section class="spatial-state" id="section-1">
+      <h1 class="giant-title">STRIPZO</h1>
+      <p class="editorial-statement">Building what comes next.</p>
+    </section>
+
+    <section class="spatial-state" id="section-2">
+      <h2 class="giant-title">BUILD.</h2>
+      <p class="editorial-statement">
+        An independent technology organisation constructing experimental digital products, platforms, and interactive experiences from scratch.
+      </p>
+    </section>
+
+    <section class="spatial-state" id="section-3">
+      <h2 class="giant-title">EXPERIMENT.</h2>
+      <div class="project-node">
+        <div class="project-label">ARTIFACT 001</div>
+        <div class="project-name">PLAYZO</div>
+        <div class="project-desc">A browser gaming platform exploring responsive canvas architecture and instant interactive delivery.</div>
+      </div>
+    </section>
+
+    <section class="spatial-state" id="section-4">
+      <h2 class="giant-title">EVOLVE.</h2>
+      <p class="editorial-statement">
+        Constantly mutating across mediums, interfaces, and technology domains.
+      </p>
+      <div class="founder-credit">Founded by Yashas</div>
+    </section>
+  </main>
+
+  <script>
+    const container = document.getElementById('webgl-stage');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x070709, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 7;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const boxGeo = new THREE.BoxGeometry(3, 3, 3, 12, 12, 12);
+    const wireMat = new THREE.MeshBasicMaterial({
+      color: 0xf1f3f5,
       wireframe: true,
       transparent: true,
-      opacity: .32
-    })
-  );
-
-
-object.add(inner);
-
-
-/* =====================================================
-   PARTICLE FIELD
-===================================================== */
-
-const particleCount = 1300;
-
-const positions =
-  new Float32Array(
-    particleCount * 3
-  );
-
-
-const particleHome =
-  new Float32Array(
-    particleCount * 3
-  );
-
-
-for(let i=0;i<particleCount;i++){
-
-  const radius =
-    3 +
-    Math.random() * 9;
-
-  const theta =
-    Math.random() *
-    Math.PI *
-    2;
-
-  const phi =
-    Math.acos(
-      2 * Math.random() - 1
-    );
-
-
-  const x =
-    radius *
-    Math.sin(phi) *
-    Math.cos(theta);
-
-  const y =
-    radius *
-    Math.sin(phi) *
-    Math.sin(theta);
-
-  const z =
-    radius *
-    Math.cos(phi);
-
-
-  positions[i*3] = x;
-  positions[i*3+1] = y;
-  positions[i*3+2] = z;
-
-  particleHome[i*3] = x;
-  particleHome[i*3+1] = y;
-  particleHome[i*3+2] = z;
-}
-
-
-const particleGeometry =
-  new THREE.BufferGeometry();
-
-
-particleGeometry.setAttribute(
-  "position",
-  new THREE.BufferAttribute(
-    positions,
-    3
-  )
-);
-
-
-const particleMaterial =
-  new THREE.PointsMaterial({
-    color: 0xffffff,
-    size: .018,
-    transparent: true,
-    opacity: .38,
-    depthWrite: false
-  });
-
-
-const particles =
-  new THREE.Points(
-    particleGeometry,
-    particleMaterial
-  );
-
-
-universe.add(particles);
-
-
-/* =====================================================
-   CONSTRUCTION FRAGMENTS
-===================================================== */
-
-const fragments =
-  new THREE.Group();
-
-universe.add(fragments);
-
-
-const fragmentMeshes = [];
-
-
-for(let i=0;i<90;i++){
-
-  const size =
-    .025 +
-    Math.random()*.07;
-
-
-  const mesh =
-    new THREE.Mesh(
-      new THREE.BoxGeometry(
-        size,
-        size,
-        size
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0x333333,
-        metalness: .8,
-        roughness: .25
-      })
-    );
-
-
-  const radius =
-    2.5 +
-    Math.random()*4;
-
-
-  const angle =
-    Math.random() *
-    Math.PI *
-    2;
-
-
-  mesh.position.set(
-    Math.cos(angle)*radius,
-    (Math.random()-.5)*5,
-    Math.sin(angle)*radius
-  );
-
-
-  mesh.userData.home =
-    mesh.position.clone();
-
-
-  mesh.userData.random =
-    Math.random();
-
-
-  fragments.add(mesh);
-
-  fragmentMeshes.push(mesh);
-}
-
-
-/* =====================================================
-   LIGHTING
-===================================================== */
-
-scene.add(
-  new THREE.AmbientLight(
-    0xffffff,
-    .18
-  )
-);
-
-
-const light =
-  new THREE.PointLight(
-    0xffffff,
-    40,
-    40
-  );
-
-
-light.position.set(
-  4,
-  4,
-  7
-);
-
-
-scene.add(light);
-
-
-const light2 =
-  new THREE.PointLight(
-    0x777777,
-    15,
-    30
-  );
-
-
-light2.position.set(
-  -5,
-  -3,
-  2
-);
-
-
-scene.add(light2);
-
-
-/* =====================================================
-   MOUSE
-===================================================== */
-
-let mouseX = 0;
-let mouseY = 0;
-
-
-window.addEventListener(
-  "pointermove",
-  event => {
-
-    mouseX =
-      event.clientX /
-      window.innerWidth -
-      .5;
-
-    mouseY =
-      event.clientY /
-      window.innerHeight -
-      .5;
-
-  }
-);
-
-
-/* =====================================================
-   RENDER
-===================================================== */
-
-function render(){
-
-  requestAnimationFrame(
-    render
-  );
-
-
-  const time =
-    performance.now() *
-    .0005;
-
-
-  /* main object */
-
-  sphere.rotation.x += .0015;
-  sphere.rotation.y += .0025;
-
-
-  cube.rotation.x += .001;
-  cube.rotation.y += .0015;
-
-
-  knot.rotation.x += .002;
-  knot.rotation.y -= .002;
-
-
-  tetra.rotation.y += .002;
-
-
-  inner.rotation.x -= .002;
-  inner.rotation.y -= .003;
-
-
-  /* fragments */
-
-  fragmentMeshes.forEach(
-    (mesh,i)=>{
-
-      mesh.rotation.x +=
-        .002 +
-        mesh.userData.random*.003;
-
-      mesh.rotation.y +=
-        .001 +
-        mesh.userData.random*.002;
-
-    }
-  );
-
-
-  /* subtle breathing */
-
-  universe.position.x +=
-    (
-      mouseX*.3 -
-      universe.position.x
-    )*.02;
-
-
-  universe.position.y +=
-    (
-      -mouseY*.2 -
-      universe.position.y
-    )*.02;
-
-
-  /* camera */
-
-  camera.position.x +=
-    (
-      mouseX*.25 -
-      camera.position.x
-    )*.015;
-
-
-  camera.position.y +=
-    (
-      -mouseY*.18 -
-      camera.position.y
-    )*.015;
-
-
-  renderer.render(
-    scene,
-    camera
-  );
-
-}
-
-
-render();
-
-
-/* =====================================================
-   INITIAL UI
-===================================================== */
-
-gsap.set(
-  ".hero",
-  {
-    opacity: 1
-  }
-);
-
-
-gsap.set(
-  [
-    ".build",
-    ".break",
-    ".evolve",
-    ".form",
-    ".project",
-    ".future",
-    ".final"
-  ],
-  {
-    opacity: 0
-  }
-);
-
-
-/* =====================================================
-   MASTER SCROLL TIMELINE
-===================================================== */
-
-const timeline =
-  gsap.timeline({
-
-    scrollTrigger: {
-
-      trigger:
-        "#scroll-space",
-
-      start:
-        "top top",
-
-      end:
-        "bottom bottom",
-
-      scrub:
-        1.5
-
+      opacity: 0.12
+    });
+    const structure = new THREE.Mesh(boxGeo, wireMat);
+    scene.add(structure);
+
+    const planeGeo = new THREE.PlaneGeometry(20, 20, 16, 16);
+    const planeMat = new THREE.MeshBasicMaterial({
+      color: 0x52525b,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.05
+    });
+    const bgPlane = new THREE.Mesh(planeGeo, planeMat);
+    bgPlane.rotation.x = Math.PI / 3;
+    bgPlane.position.z = -5;
+    scene.add(bgPlane);
+
+    let clock = new THREE.Clock();
+
+    function render() {
+      requestAnimationFrame(render);
+      const time = clock.getElapsedTime();
+
+      structure.rotation.x = time * 0.08;
+      structure.rotation.y = time * 0.12;
+      bgPlane.rotation.z = time * 0.02;
+
+      renderer.render(scene, camera);
     }
 
-  });
-
-
-/* =====================================================
-   1 — HERO
-===================================================== */
-
-timeline.to(
-  ".hero",
-  {
-    opacity: 0,
-    y: -80,
-    duration: 1
-  },
-  1
-);
-
-
-/* object grows */
-
-timeline.to(
-  object.scale,
-  {
-    x: 1.25,
-    y: 1.25,
-    z: 1.25,
-    duration: 1.2,
-    ease: "power2.inOut"
-  },
-  1
-);
-
-
-/* =====================================================
-   2 — BUILD
-===================================================== */
-
-timeline.to(
-  ".build",
-  {
-    opacity: 1,
-    y: 0,
-    duration: .8
-  },
-  1.2
-);
-
-
-/* sphere → cube */
-
-timeline.to(
-  sphere.scale,
-  {
-    x: .001,
-    y: .001,
-    z: .001,
-    duration: 1.2,
-    ease: "power3.inOut"
-  },
-  2
-);
-
-
-timeline.to(
-  cube.scale,
-  {
-    x: 1,
-    y: 1,
-    z: 1,
-    duration: 1.2,
-    ease: "power3.inOut"
-  },
-  2
-);
-
-
-/* fragments assemble */
-
-fragmentMeshes.forEach(
-  (mesh,i)=>{
-
-    timeline.to(
-      mesh.position,
-      {
-        x:
-          mesh.userData.home.x*.2,
-
-        y:
-          mesh.userData.home.y*.2,
-
-        z:
-          mesh.userData.home.z*.2,
-
-        duration:
-          1.2,
-
-        ease:
-          "power3.inOut"
-      },
-      1.7 + (i%10)*.015
-    );
-
-  }
-);
-
-
-/* =====================================================
-   3 — BREAK
-===================================================== */
-
-timeline.to(
-  ".build",
-  {
-    opacity: 0,
-    y: -60,
-    duration: .6
-  },
-  3.4
-);
-
-
-timeline.to(
-  ".break",
-  {
-    opacity: 1,
-    y: 0,
-    duration: .7
-  },
-  3.5
-);
-
-
-/* cube explodes */
-
-timeline.to(
-  cube.scale,
-  {
-    x: .001,
-    y: .001,
-    z: .001,
-    duration: .8,
-    ease: "power3.in"
-  },
-  4
-);
-
-
-/* knot appears */
-
-timeline.to(
-  knot.scale,
-  {
-    x: 1,
-    y: 1,
-    z: 1,
-    duration: 1,
-    ease: "back.out(1.5)"
-  },
-  4.1
-);
-
-
-/* fragments explode */
-
-fragmentMeshes.forEach(
-  (mesh,i)=>{
-
-    const direction =
-      mesh.userData.home
-        .clone()
-        .normalize();
-
-
-    timeline.to(
-      mesh.position,
-      {
-
-        x:
-          direction.x *
-          (5 + mesh.userData.random*4),
-
-        y:
-          direction.y *
-          (5 + mesh.userData.random*4),
-
-        z:
-          direction.z *
-          (5 + mesh.userData.random*4),
-
-        duration:
-          1.5,
-
-        ease:
-          "power3.out"
-
-      },
-      3.8
-    );
-
-  }
-);
-
-
-/* =====================================================
-   4 — EVOLVE
-===================================================== */
-
-timeline.to(
-  ".break",
-  {
-    opacity: 0,
-    y: -60,
-    duration: .6
-  },
-  5.1
-);
-
-
-timeline.to(
-  ".evolve",
-  {
-    opacity: 1,
-    y: 0,
-    duration: .7
-  },
-  5.2
-);
-
-
-/* knot → tetra */
-
-timeline.to(
-  knot.scale,
-  {
-    x: .001,
-    y: .001,
-    z: .001,
-    duration: .9,
-    ease: "power3.inOut"
-  },
-  5.7
-);
-
-
-timeline.to(
-  tetra.scale,
-  {
-    x: 1,
-    y: 1,
-    z: 1,
-    duration: 1.1,
-    ease: "power3.out"
-  },
-  5.8
-);
-
-
-/* =====================================================
-   5 — NO FIXED FORM
-===================================================== */
-
-timeline.to(
-  ".evolve",
-  {
-    opacity: 0,
-    y: -60,
-    duration: .6
-  },
-  6.9
-);
-
-
-timeline.to(
-  ".form",
-  {
-    opacity: 1,
-    y: 0,
-    duration: .7
-  },
-  7
-);
-
-
-/* entire environment expands */
-
-timeline.to(
-  universe.scale,
-  {
-    x: 1.7,
-    y: 1.7,
-    z: 1.7,
-    duration: 1.5,
-    ease: "power3.inOut"
-  },
-  7
-);
-
-
-/* tetra disappears */
-
-timeline.to(
-  tetra.scale,
-  {
-    x: .001,
-    y: .001,
-    z: .001,
-    duration: 1
-  },
-  7.5
-);
-
-
-/* sphere returns */
-
-timeline.to(
-  sphere.scale,
-  {
-    x: .7,
-    y: .7,
-    z: .7,
-    duration: 1
-  },
-  7.7
-);
-
-
-/* =====================================================
-   6 — PLAYZO
-===================================================== */
-
-timeline.to(
-  ".form",
-  {
-    opacity: 0,
-    y: -50,
-    duration: .6
-  },
-  8.5
-);
-
-
-timeline.to(
-  ".project",
-  {
-    opacity: 1,
-    scale: .8,
-    duration: .8
-  },
-  8.6
-);
-
-
-/* tiny project reveal */
-
-timeline.to(
-  ".project",
-  {
-    scale: 1,
-    duration: 1
-  },
-  9
-);
-
-
-/* camera approaches */
-
-timeline.to(
-  camera.position,
-  {
-    z: 5.5,
-    duration: 1.3,
-    ease: "power3.inOut"
-  },
-  9
-);
-
-
-/* =====================================================
-   7 — FUTURE
-===================================================== */
-
-timeline.to(
-  ".project",
-  {
-    opacity: 0,
-    scale: 1.15,
-    duration: .7
-  },
-  10.1
-);
-
-
-timeline.to(
-  camera.position,
-  {
-    z: 9,
-    duration: 1.2
-  },
-  10.1
-);
-
-
-timeline.to(
-  ".future",
-  {
-    opacity: 1,
-    y: 0,
-    duration: .8
-  },
-  10.2
-);
-
-
-/* restore fragments */
-
-fragmentMeshes.forEach(
-  (mesh,i)=>{
-
-    const target =
-      mesh.userData.home;
-
-
-    timeline.to(
-      mesh.position,
-      {
-        x: target.x,
-        y: target.y,
-        z: target.z,
-        duration: 1.4,
-        ease: "power3.out"
-      },
-      10.2
-    );
-
-  }
-);
-
-
-/* =====================================================
-   8 — FINAL
-===================================================== */
-
-timeline.to(
-  ".future",
-  {
-    opacity: 0,
-    y: -70,
-    duration: .7
-  },
-  11.5
-);
-
-
-timeline.to(
-  ".final",
-  {
-    opacity: 1,
-    y: 0,
-    duration: 1
-  },
-  11.6
-);
-
-
-/* final world settles */
-
-timeline.to(
-  universe.scale,
-  {
-    x: 1,
-    y: 1,
-    z: 1,
-    duration: 1.4,
-    ease: "power3.inOut"
-  },
-  11.5
-);
-
-
-/* =====================================================
-   PROGRESS
-===================================================== */
-
-gsap.to(
-  ".progress-fill",
-  {
-    height: "100%",
-
-    ease: "none",
-
-    scrollTrigger: {
-
-      trigger:
-        "#scroll-space",
-
-      start:
-        "top top",
-
-      end:
-        "bottom bottom",
-
-      scrub:
-        true
-
-    }
-  }
-);
-
-
-/* =====================================================
-   RESIZE
-===================================================== */
-
-window.addEventListener(
-  "resize",
-  () => {
-
-    camera.aspect =
-      window.innerWidth /
-      window.innerHeight;
-
-    camera.updateProjectionMatrix();
-
-
-    renderer.setSize(
-      window.innerWidth,
-      window.innerHeight
-    );
-
-  }
-);
-
-</script>
-
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    render();
+
+    const stateLabel = document.getElementById('state-label');
+    const states = [
+      { id: '01 / ORIGIN', scale: 1, posZ: 0 },
+      { id: '02 / BUILD', scale: 1.6, posZ: 1.5 },
+      { id: '03 / EXPERIMENT', scale: 2.2, posZ: -1 },
+      { id: '04 / EVOLVE', scale: 0.8, posZ: -3 }
+    ];
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = Math.min(Math.max(scrollY / (maxScroll || 1), 0), 1);
+
+      const stateIndex = Math.min(Math.floor(progress * states.length), states.length - 1);
+      const currentState = states[stateIndex];
+
+      stateLabel.innerText = currentState.id;
+
+      structure.scale.set(currentState.scale, currentState.scale, currentState.scale);
+      structure.position.z = currentState.posZ;
+    });
+  </script>
 </body>
 </html>
