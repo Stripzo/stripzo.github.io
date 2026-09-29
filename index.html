@@ -3,43 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STRIPZO Preview</title>
+  <title>STRIPZO — High-Class Digital Artifact</title>
+  
+  <!-- Premium Modern Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
   <style>
     :root {
-      --bg: #070709;
-      --fg: #f1f3f5;
-      --muted: #52525b;
-      --accent-subtle: #a1a1aa;
+      --bg: #030304;
+      --fg: #f8fafc;
+      --muted: #64748b;
+      --accent-glow: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.08);
       --font-display: 'Syne', sans-serif;
-      --font-body: 'Space Grotesk', sans-serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
     html, body {
       background: var(--bg);
       color: var(--fg);
-      font-family: var(--font-body);
+      font-family: var(--font-sans);
       overflow-x: hidden;
-      width: 100vw;
+      width: 100%;
+      height: 100%;
+      cursor: none; /* Custom precision dot */
     }
 
+    /* Custom Precision Cursor */
+    #cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 6px;
+      height: 6px;
+      background: var(--fg);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s, height 0.3s, background 0.3s;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease-out;
+    }
+
+    /* WebGL Canvas */
     #webgl-stage {
       position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       z-index: 1;
       pointer-events: none;
     }
 
-    .top-bar {
+    /* Architectural Layout & Lines */
+    .hairline-v {
       position: fixed;
-      top: 0; left: 0;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .line-left { left: 8vw; }
+    .line-right { right: 8vw; }
+
+    /* Minimalist Fixed Header */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
       width: 100vw;
-      padding: 32px 48px;
+      padding: 40px 8vw;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -47,197 +109,287 @@
       mix-blend-mode: difference;
     }
 
-    .brand-id {
+    .brand-mark {
       font-family: var(--font-display);
       font-weight: 800;
-      font-size: 1rem;
-      letter-spacing: 0.3em;
-      color: var(--fg);
+      font-size: 1.1rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: #ffffff;
     }
 
-    .state-indicator {
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
+    .status-badge {
+      font-size: 0.7rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
       color: var(--muted);
       text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    #spatial-viewport {
+    .status-dot {
+      width: 4px;
+      height: 4px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8);
+    }
+
+    /* Spatial Viewport Sections */
+    #viewport {
       position: relative;
       z-index: 10;
       width: 100%;
     }
 
-    .spatial-state {
-      height: 100vh;
+    .stage-section {
+      min-height: 100vh;
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 0 10vw;
+      padding: 0 12vw;
       position: relative;
     }
 
-    .giant-title {
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: clamp(3.5rem, 11vw, 10rem);
-      line-height: 0.85;
-      letter-spacing: -0.04em;
-      color: var(--fg);
+    /* Monolithic Typography System */
+    .label-meta {
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      color: var(--muted);
       text-transform: uppercase;
-      transition: opacity 0.5s ease;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
-    .editorial-statement {
-      font-size: clamp(1.1rem, 2vw, 1.8rem);
-      font-weight: 300;
-      line-height: 1.4;
-      max-width: 680px;
-      color: var(--accent-subtle);
-      margin-top: 32px;
+    .label-meta::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--muted);
+    }
+
+    .monolith-heading {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(3rem, 9vw, 8.5rem);
+      line-height: 0.9;
+      letter-spacing: -0.03em;
+      color: var(--fg);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .editorial-copy {
+      font-size: clamp(1.1rem, 1.8vw, 1.6rem);
+      font-weight: 200;
+      line-height: 1.5;
+      max-width: 640px;
+      color: #94a3b8;
       letter-spacing: -0.01em;
     }
 
-    .project-node {
-      margin-top: 40px;
-      border-left: 2px solid var(--fg);
-      padding-left: 24px;
+    /* High-Class Artifact Card (No Generic HUD) */
+    .artifact-card {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 48px;
+      max-width: 520px;
+      margin-top: 24px;
+      border-radius: 2px;
+      position: relative;
+      transition: border-color 0.5s;
     }
 
-    .project-label {
+    .artifact-card:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .artifact-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .artifact-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    .founder-signature {
+      margin-top: 48px;
       font-size: 0.8rem;
       letter-spacing: 0.2em;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .project-name {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 3.5rem);
-      font-weight: 700;
-      color: var(--fg);
-    }
-
-    .project-desc {
-      font-size: 1rem;
-      color: var(--muted);
-      margin-top: 8px;
-      max-width: 420px;
-    }
-
-    .founder-credit {
-      font-size: 0.85rem;
-      letter-spacing: 0.15em;
-      color: var(--muted);
-      margin-top: 40px;
       text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      gap: 12px;
+      align-items: center;
     }
 
-    .scroll-hint {
+    .founder-signature span {
+      color: var(--fg);
+      font-weight: 500;
+    }
+
+    /* Footer Indicator */
+    .footer-nav {
       position: fixed;
-      bottom: 32px;
-      right: 48px;
-      font-size: 0.7rem;
-      letter-spacing: 0.25em;
+      bottom: 40px;
+      right: 8vw;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
       color: var(--muted);
+      text-transform: uppercase;
       z-index: 100;
       mix-blend-mode: difference;
     }
 
     @media (max-width: 768px) {
-      .top-bar { padding: 24px; }
-      .spatial-state { padding: 0 6vw; }
-      .scroll-hint { right: 24px; bottom: 24px; }
+      .header { padding: 24px 6vw; }
+      .stage-section { padding: 0 8vw; }
+      .line-left, .line-right { display: none; }
+      .artifact-card { padding: 32px; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Custom Precision Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- WebGL Architectural Monolith -->
   <div id="webgl-stage"></div>
 
-  <header class="top-bar">
-    <div class="brand-id">STRIPZO</div>
-    <div class="state-indicator" id="state-label">01 / ORIGIN</div>
+  <!-- Structural Lines -->
+  <div class="hairline-v line-left"></div>
+  <div class="hairline-v line-right"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand-mark">STRIPZO</div>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span id="state-index">01 / ORIGIN</span>
+    </div>
   </header>
 
-  <div class="scroll-hint">SCROLL TO TRANSFORM</div>
+  <!-- Scroll Viewport -->
+  <main id="viewport">
 
-  <main id="spatial-viewport">
-    <section class="spatial-state" id="section-1">
-      <h1 class="giant-title">STRIPZO</h1>
-      <p class="editorial-statement">Building what comes next.</p>
-    </section>
-
-    <section class="spatial-state" id="section-2">
-      <h2 class="giant-title">BUILD.</h2>
-      <p class="editorial-statement">
-        An independent technology organisation constructing experimental digital products, platforms, and interactive experiences from scratch.
+    <!-- STATE 01 -->
+    <section class="stage-section" id="sec-1">
+      <div class="label-meta">ORGANISATION IDENTITY</div>
+      <h1 class="monolith-heading">Building<br>What Comes Next.</h1>
+      <p class="editorial-copy">
+        STRIPZO is an independent technology and digital-products organisation constructing custom platforms, interfaces, and experiences.
       </p>
     </section>
 
-    <section class="spatial-state" id="section-3">
-      <h2 class="giant-title">EXPERIMENT.</h2>
-      <div class="project-node">
-        <div class="project-label">ARTIFACT 001</div>
-        <div class="project-name">PLAYZO</div>
-        <div class="project-desc">A browser gaming platform exploring responsive canvas architecture and instant interactive delivery.</div>
+    <!-- STATE 02 -->
+    <section class="stage-section" id="sec-2">
+      <div class="label-meta">PHILOSOPHY & PURPOSE</div>
+      <h2 class="monolith-heading">Formed From<br>Scratch.</h2>
+      <p class="editorial-copy">
+        Unconventional thinking paired with absolute execution discipline. We create digital platforms designed as living environments.
+      </p>
+    </section>
+
+    <!-- STATE 03 -->
+    <section class="stage-section" id="sec-3">
+      <div class="label-meta">ACTIVE EXPERIMENT</div>
+      <div class="artifact-card">
+        <div class="label-meta" style="margin-bottom: 12px;">ARTIFACT 001</div>
+        <div class="artifact-title">PLAYZO</div>
+        <div class="artifact-sub">
+          A high-performance browser gaming platform built to test instant web graphics delivery and zero-friction digital play.
+        </div>
       </div>
     </section>
 
-    <section class="spatial-state" id="section-4">
-      <h2 class="giant-title">EVOLVE.</h2>
-      <p class="editorial-statement">
-        Constantly mutating across mediums, interfaces, and technology domains.
+    <!-- STATE 04 -->
+    <section class="stage-section" id="sec-4">
+      <div class="label-meta">ARCHITECTURE & LEADERSHIP</div>
+      <h2 class="monolith-heading">Constant<br>Evolution.</h2>
+      <p class="editorial-copy">
+        An ecosystem continuously expanding into new fields, mediums, and tech vectors.
       </p>
-      <div class="founder-credit">Founded by Yashas</div>
+      <div class="founder-signature">
+        FOUNDER <span>YASHAS</span>
+      </div>
     </section>
+
   </main>
 
+  <div class="footer-nav">SCROLL TO TRANSITION</div>
+
   <script>
+    // --- Custom Cursor Motion ---
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+
+    window.addEventListener('mousemove', (e) => {
+      gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.1 });
+      gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.35, ease: 'power2.out' });
+    });
+
+    // --- WebGL Engine: Premium Metallic Wireframe Architecture ---
     const container = document.getElementById('webgl-stage');
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x070709, 0.035);
+    scene.fog = new THREE.FogExp2(0x030304, 0.03);
 
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 7;
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 8;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    const boxGeo = new THREE.BoxGeometry(3, 3, 3, 12, 12, 12);
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0xf1f3f5,
+    // High-Precision Architectural Torus Knot (Minimal & Refined)
+    const geometry = new THREE.TorusKnotGeometry(1.8, 0.45, 128, 32, 2, 3);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
       wireframe: true,
       transparent: true,
-      opacity: 0.12
+      opacity: 0.08
     });
-    const structure = new THREE.Mesh(boxGeo, wireMat);
+
+    const structure = new THREE.Mesh(geometry, material);
     scene.add(structure);
 
-    const planeGeo = new THREE.PlaneGeometry(20, 20, 16, 16);
-    const planeMat = new THREE.MeshBasicMaterial({
-      color: 0x52525b,
+    // Inner Subtle Core Lattice
+    const coreGeo = new THREE.IcosahedronGeometry(1.2, 2);
+    const coreMat = new THREE.MeshBasicMaterial({
+      color: 0x64748b,
       wireframe: true,
       transparent: true,
       opacity: 0.05
     });
-    const bgPlane = new THREE.Mesh(planeGeo, planeMat);
-    bgPlane.rotation.x = Math.PI / 3;
-    bgPlane.position.z = -5;
-    scene.add(bgPlane);
+    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+    scene.add(coreMesh);
 
+    // Render Animation Loop
     let clock = new THREE.Clock();
 
     function render() {
       requestAnimationFrame(render);
       const time = clock.getElapsedTime();
 
-      structure.rotation.x = time * 0.08;
-      structure.rotation.y = time * 0.12;
-      bgPlane.rotation.z = time * 0.02;
+      structure.rotation.x = time * 0.05;
+      structure.rotation.y = time * 0.08;
+      coreMesh.rotation.y = -time * 0.04;
 
       renderer.render(scene, camera);
     }
@@ -250,27 +402,34 @@
 
     render();
 
-    const stateLabel = document.getElementById('state-label');
-    const states = [
-      { id: '01 / ORIGIN', scale: 1, posZ: 0 },
-      { id: '02 / BUILD', scale: 1.6, posZ: 1.5 },
-      { id: '03 / EXPERIMENT', scale: 2.2, posZ: -1 },
-      { id: '04 / EVOLVE', scale: 0.8, posZ: -3 }
-    ];
+    // --- GSAP Spatial Scroll Transformations ---
+    gsap.registerPlugin(ScrollTrigger);
 
-    window.addEventListener('scroll', () => {
-      const scrollY = window.scrollY;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = Math.min(Math.max(scrollY / (maxScroll || 1), 0), 1);
+    const stateLabel = document.getElementById('state-index');
+    const states = ['01 / ORIGIN', '02 / PHILOSOPHY', '03 / PLAYZO', '04 / EVOLUTION'];
 
-      const stateIndex = Math.min(Math.floor(progress * states.length), states.length - 1);
-      const currentState = states[stateIndex];
+    const sections = gsap.utils.toArray('.stage-section');
 
-      stateLabel.innerText = currentState.id;
-
-      structure.scale.set(currentState.scale, currentState.scale, currentState.scale);
-      structure.position.z = currentState.posZ;
+    sections.forEach((sec, idx) => {
+      ScrollTrigger.create({
+        trigger: sec,
+        start: 'top center',
+        end: 'bottom center',
+        onEnter: () => updateState(idx),
+        onEnterBack: () => updateState(idx)
+      });
     });
+
+    function updateState(index) {
+      stateLabel.innerText = states[index];
+
+      // Subtle 3D mesh transforms per section
+      const targetScale = [1, 1.3, 0.9, 1.4][index];
+      const targetOpacity = [0.08, 0.12, 0.05, 0.15][index];
+
+      gsap.to(structure.scale, { x: targetScale, y: targetScale, z: targetScale, duration: 1.5, ease: 'power3.out' });
+      gsap.to(material, { opacity: targetOpacity, duration: 1 });
+    }
   </script>
 </body>
 </html>
