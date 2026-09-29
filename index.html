@@ -1,3202 +1,1606 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>STRIPZO — Building What's Next</title>
+<title>STRIPZO — Building What Comes Next</title>
+
+<meta
+  name="description"
+  content="STRIPZO is an independent digital organisation building, experimenting and evolving ideas."
+/>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+:root {
+  --bg: #050505;
+  --fg: #f5f5f5;
+  --muted: rgba(245,245,245,.45);
+  --line: rgba(255,255,255,.12);
 }
 
-html,body{
-    background:#000;
-    color:white;
-    overflow-x:hidden;
-    font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "SF Pro Display",
-    "Inter",
-    Arial,
-    sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-canvas{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    z-index:0;
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-#scroll{
-    height:850vh;
-    position:relative;
-    z-index:2;
+body {
+  overflow-x: hidden;
 }
 
-.noise{
-    position:fixed;
-    inset:0;
-    z-index:50;
-    pointer-events:none;
-    opacity:.025;
-
-    background-image:url(
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"
-    );
+body::-webkit-scrollbar {
+  width: 0;
 }
 
-/* NAV */
-
-nav{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:76px;
-
-    padding:0 42px;
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    z-index:100;
-
-    mix-blend-mode:difference;
+canvas {
+  display: block;
 }
 
-.logo{
-    font-size:20px;
-    font-weight:800;
-    letter-spacing:-.08em;
+/* -------------------------------------------------------
+   3D WORLD
+------------------------------------------------------- */
+
+#world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
 }
 
-.navRight{
-    font-size:9px;
-    letter-spacing:.25em;
-    text-transform:uppercase;
-    color:#aaa;
+/* -------------------------------------------------------
+   UI
+------------------------------------------------------- */
+
+.ui {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
 }
 
-/* TEXT */
+.nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 28px 38px;
 
-.copy{
-    position:fixed;
-    inset:0;
-    z-index:10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    pointer-events:none;
-
-    text-align:center;
+  mix-blend-mode: difference;
 }
 
-.copyBlock{
-    position:absolute;
-    width:92%;
-
-    opacity:0;
-
-    transform:
-    translateY(70px)
-    scale(.94);
+.logo {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: .22em;
 }
 
-.kicker{
-    margin-bottom:25px;
-
-    font-size:10px;
-    letter-spacing:.34em;
-    text-transform:uppercase;
-
-    color:#666;
+.nav-right {
+  font-size: 9px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  opacity: .55;
 }
 
-.title{
-    font-size:clamp(75px,15vw,205px);
+.founder {
+  position: absolute;
+  left: 38px;
+  bottom: 28px;
 
-    line-height:.78;
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
 
-    letter-spacing:-.1em;
-
-    font-weight:800;
+  color: rgba(255,255,255,.38);
 }
 
-.description{
-    max-width:500px;
-
-    margin:30px auto 0;
-
-    font-size:14px;
-
-    line-height:1.7;
-
-    color:#777;
+.founder span {
+  color: white;
 }
 
-/* HERO */
+.progress {
+  position: absolute;
+  right: 38px;
+  top: 50%;
+  transform: translateY(-50%);
 
-#hero{
-    opacity:1;
-    transform:none;
+  width: 1px;
+  height: 90px;
+
+  background: rgba(255,255,255,.12);
 }
 
-#hero .title{
-    background:
-    linear-gradient(
-        180deg,
-        #fff,
-        #aaa 45%,
-        #444
-    );
-
-    -webkit-background-clip:text;
-    color:transparent;
+.progress-fill {
+  width: 100%;
+  height: 0%;
+  background: white;
 }
 
-/* PLAYZO */
+.scroll-label {
+  position: absolute;
+  right: 22px;
+  bottom: 28px;
 
-.playzo{
-    font-size:clamp(80px,16vw,220px);
+  writing-mode: vertical-rl;
 
-    line-height:.78;
+  font-size: 8px;
+  letter-spacing: .25em;
+  text-transform: uppercase;
 
-    letter-spacing:-.11em;
-
-    font-weight:850;
-
-    background:
-    linear-gradient(
-        100deg,
-        #fff,
-        #777,
-        #fff
-    );
-
-    background-size:200%;
-
-    -webkit-background-clip:text;
-    color:transparent;
-
-    animation:
-    shine 5s linear infinite;
+  opacity: .35;
 }
 
-@keyframes shine{
-    from{
-        background-position:0%;
-    }
+/* -------------------------------------------------------
+   TYPOGRAPHY
+------------------------------------------------------- */
 
-    to{
-        background-position:200%;
-    }
+.copy {
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  width: min(1000px, 90vw);
+
+  transform: translate(-50%, -50%);
+
+  text-align: center;
+
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* FINAL */
-
-.finalTitle{
-    font-size:clamp(55px,10vw,145px);
-
-    line-height:.82;
-
-    letter-spacing:-.09em;
-
-    font-weight:750;
+.copy.visible {
+  opacity: 1;
 }
 
-/* FOUNDER */
+.eyebrow {
+  margin-bottom: 26px;
 
-.founder{
-    position:fixed;
+  font-size: 10px;
+  letter-spacing: .28em;
 
-    bottom:30px;
-    left:40px;
+  text-transform: uppercase;
 
-    z-index:100;
-
-    font-size:9px;
-
-    letter-spacing:.22em;
-
-    text-transform:uppercase;
-
-    color:#555;
+  color: rgba(255,255,255,.48);
 }
 
-.founder span{
-    color:#aaa;
+.title {
+  font-size: clamp(70px, 15vw, 190px);
+
+  line-height: .8;
+
+  letter-spacing: -.085em;
+
+  font-weight: 700;
 }
 
-/* SCROLL */
+.subtitle {
+  max-width: 480px;
 
-.scrollHint{
-    position:fixed;
+  margin: 34px auto 0;
 
-    bottom:30px;
-    left:50%;
+  font-size: 14px;
 
-    transform:translateX(-50%);
+  line-height: 1.7;
 
-    z-index:100;
-
-    font-size:9px;
-
-    letter-spacing:.3em;
-
-    text-transform:uppercase;
-
-    color:#666;
+  color: var(--muted);
 }
 
-.scrollLine{
-    width:1px;
-    height:34px;
+.big-word {
+  font-size: clamp(65px, 12vw, 160px);
 
-    margin:10px auto 0;
+  line-height: .82;
 
-    background:
-    linear-gradient(
-        #aaa,
-        transparent
-    );
+  letter-spacing: -.075em;
+
+  font-weight: 700;
 }
 
-/* PROGRESS */
+.micro {
+  margin-top: 28px;
 
-.progress{
-    position:fixed;
+  font-size: 9px;
 
-    right:28px;
-    top:50%;
+  letter-spacing: .24em;
 
-    transform:translateY(-50%);
+  text-transform: uppercase;
 
-    width:1px;
-    height:80px;
-
-    background:#222;
-
-    z-index:100;
+  color: rgba(255,255,255,.38);
 }
 
-.progressBar{
-    width:100%;
-    height:0%;
+/* -------------------------------------------------------
+   SCROLL SPACE
+------------------------------------------------------- */
 
-    background:white;
+#scroll-space {
+  height: 1100vh;
 }
 
-/* MOBILE */
+/* -------------------------------------------------------
+   NOISE
+------------------------------------------------------- */
 
-@media(max-width:700px){
+.noise {
+  position: fixed;
+  inset: 0;
 
-    nav{
-        padding:0 20px;
-    }
+  z-index: 20;
 
-    .navRight{
-        display:none;
-    }
+  pointer-events: none;
 
-    .founder{
-        left:20px;
-        bottom:20px;
-    }
+  opacity: .035;
 
-    .progress{
-        right:12px;
-    }
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* -------------------------------------------------------
+   MOBILE
+------------------------------------------------------- */
+
+@media(max-width: 700px) {
+
+  .nav {
+    padding: 20px;
+  }
+
+  .nav-right {
+    display: none;
+  }
+
+  .founder {
+    left: 20px;
+    bottom: 20px;
+  }
+
+  .progress {
+    right: 20px;
+  }
+
+  .scroll-label {
+    right: 8px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    max-width: 330px;
+  }
 }
 </style>
 </head>
 
 <body>
 
+<!-- =====================================================
+     3D WORLD
+===================================================== -->
+
+<div id="world"></div>
+
+
+<!-- =====================================================
+     UI
+===================================================== -->
+
+<div class="ui">
+
+  <div class="nav">
+    <div class="logo">STRIPZO</div>
+
+    <div class="nav-right">
+      Independent Digital Organisation
+    </div>
+  </div>
+
+
+  <div class="founder">
+    Founded by <span>Yashas</span>
+  </div>
+
+
+  <div class="progress">
+    <div class="progress-fill"></div>
+  </div>
+
+
+  <div class="scroll-label">
+    Scroll to explore
+  </div>
+
+
+  <!-- HERO -->
+
+  <div class="copy hero">
+
+    <div class="eyebrow">
+      Independent Digital Organisation
+    </div>
+
+    <div class="title">
+      STRIPZO
+    </div>
+
+    <div class="subtitle">
+      We build ideas, experiment with possibilities,
+      and evolve them into things that didn't exist before.
+    </div>
+
+  </div>
+
+
+  <!-- BUILD -->
+
+  <div class="copy build">
+
+    <div class="eyebrow">
+      01 — BUILD
+    </div>
+
+    <div class="big-word">
+      BUILD.
+    </div>
+
+    <div class="micro">
+      Start with an idea.
+    </div>
+
+  </div>
+
+
+  <!-- BREAK -->
+
+  <div class="copy break">
+
+    <div class="eyebrow">
+      02 — BREAK
+    </div>
+
+    <div class="big-word">
+      BREAK.
+    </div>
+
+    <div class="micro">
+      Question everything.
+    </div>
+
+  </div>
+
+
+  <!-- EVOLVE -->
+
+  <div class="copy evolve">
+
+    <div class="eyebrow">
+      03 — EVOLVE
+    </div>
+
+    <div class="big-word">
+      EVOLVE.
+    </div>
+
+    <div class="micro">
+      Make something better.
+    </div>
+
+  </div>
+
+
+  <!-- NO FIXED FORM -->
+
+  <div class="copy form">
+
+    <div class="eyebrow">
+      No fixed form.
+    </div>
+
+    <div class="big-word">
+      ONE IDEA.
+    </div>
+
+    <div class="micro">
+      Infinite possibilities.
+    </div>
+
+  </div>
+
+
+  <!-- PROJECT -->
+
+  <div class="copy project">
+
+    <div class="eyebrow">
+      A STRIPZO PROJECT
+    </div>
+
+    <div class="big-word">
+      PLAYZO
+    </div>
+
+    <div class="micro">
+      One experiment among many.
+    </div>
+
+  </div>
+
+
+  <!-- FUTURE -->
+
+  <div class="copy future">
+
+    <div class="eyebrow">
+      The story isn't finished.
+    </div>
+
+    <div class="big-word">
+      MORE.
+    </div>
+
+    <div class="subtitle">
+      Some ideas are being built.
+      Some are being tested.
+      Some don't have names yet.
+    </div>
+
+  </div>
+
+
+  <!-- FINAL -->
+
+  <div class="copy final">
+
+    <div class="eyebrow">
+      STRIPZO
+    </div>
+
+    <div class="big-word">
+      BUILD.<br>
+      EXPERIMENT.<br>
+      EVOLVE.
+    </div>
+
+    <div class="micro">
+      Building what comes next.
+    </div>
+
+  </div>
+
+</div>
+
+
 <div class="noise"></div>
 
-<canvas id="canvas"></canvas>
-
-
-<!-- NAV -->
-
-<nav>
-
-    <div class="logo">
-        STRIPZO
-    </div>
-
-    <div class="navRight">
-        Independent Digital Company
-    </div>
-
-</nav>
-
-
-<!-- TEXT -->
-
-<div class="copy">
-
-    <!-- HERO -->
-
-    <div
-        class="copyBlock"
-        id="hero"
-    >
-
-        <div class="kicker">
-            Independent Digital Company
-        </div>
-
-        <div class="title">
-            STRIPZO
-        </div>
-
-        <div class="description">
-
-            We build digital products,
-            platforms and experiences
-            designed for what's next.
-
-        </div>
-
-    </div>
-
-
-    <!-- BUILD -->
-
-    <div
-        class="copyBlock"
-        id="build"
-    >
-
-        <div class="kicker">
-            The beginning
-        </div>
-
-        <div class="title">
-            BUILD.
-        </div>
-
-        <div class="description">
-
-            Ideas shouldn't stay ideas.
-            We turn them into things
-            people can actually use.
-
-        </div>
-
-    </div>
-
-
-    <!-- PLAYZO -->
-
-    <div
-        class="copyBlock"
-        id="play"
-    >
-
-        <div class="kicker">
-            A STRIPZO product
-        </div>
-
-        <div class="playzo">
-            PLAYZO
-        </div>
-
-        <div class="description">
-
-            Instant browser gaming.
-            No downloads.
-            Just play.
-
-        </div>
-
-    </div>
-
-
-    <!-- EXPLORE -->
-
-    <div
-        class="copyBlock"
-        id="explore"
-    >
-
-        <div class="kicker">
-            The philosophy
-        </div>
-
-        <div class="title">
-            EXPLORE.
-        </div>
-
-        <div class="description">
-
-            We experiment across ideas,
-            technology and completely
-            different digital worlds.
-
-        </div>
-
-    </div>
-
-
-    <!-- FINAL -->
-
-    <div
-        class="copyBlock"
-        id="final"
-    >
-
-        <div class="kicker">
-            STRIPZO
-        </div>
-
-        <div class="finalTitle">
-
-            <div>BUILD.</div>
-            <div>EXPERIMENT.</div>
-            <div>EVOLVE.</div>
-
-        </div>
-
-        <div class="description">
-            Building What's Next.
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- FOUNDER -->
-
-<div class="founder">
-    Founded by <span>Yashas</span>
-</div>
-
-
-<div id="scroll"></div>
-
-
-<div
-    class="scrollHint"
-    id="scrollHint"
->
-    Scroll
-    <div class="scrollLine"></div>
-</div>
-
-
-<div class="progress">
-    <div
-        class="progressBar"
-        id="progressBar"
-    ></div>
-</div>
+<div id="scroll-space"></div>
 
 
 <script>
 
-/* =========================================================
-THREE SETUP
-========================================================= */
+/* =====================================================
+   SETUP
+===================================================== */
 
-const canvas =
-document.getElementById("canvas");
+gsap.registerPlugin(ScrollTrigger);
 
-const scene =
-new THREE.Scene();
-
-const camera =
-new THREE.PerspectiveCamera(
-    45,
-    innerWidth / innerHeight,
-    .1,
-    200
-);
-
-camera.position.set(
-    0,
-    0,
-    10
-);
-
-const renderer =
-new THREE.WebGLRenderer({
-    canvas,
-    antialias:true,
-    alpha:true
-});
-
-renderer.setPixelRatio(
-    Math.min(devicePixelRatio,2)
-);
-
-renderer.setSize(
-    innerWidth,
-    innerHeight
-);
-
-
-/* =========================================================
-LIGHTING
-========================================================= */
-
-scene.add(
-    new THREE.AmbientLight(
-        0xffffff,
-        .45
-    )
-);
-
-const keyLight =
-new THREE.PointLight(
-    0xffffff,
-    10,
-    70
-);
-
-keyLight.position.set(
-    5,
-    5,
-    8
-);
-
-scene.add(keyLight);
-
-const fillLight =
-new THREE.PointLight(
-    0x777777,
-    6,
-    60
-);
-
-fillLight.position.set(
-    -6,
-    -3,
-    -5
-);
-
-scene.add(fillLight);
-
-
-/* =========================================================
-WORLD
-========================================================= */
 
 const world =
-new THREE.Group();
-
-scene.add(world);
+  document.getElementById("world");
 
 
-/* =========================================================
-CENTRAL OBJECT
-========================================================= */
+const scene =
+  new THREE.Scene();
 
-const coreGroup =
-new THREE.Group();
 
-world.add(coreGroup);
+scene.background =
+  new THREE.Color(0x050505);
 
-const core =
-new THREE.Mesh(
 
-    new THREE.IcosahedronGeometry(
-        1.7,
-        5
-    ),
+const camera =
+  new THREE.PerspectiveCamera(
+    50,
+    window.innerWidth / window.innerHeight,
+    .1,
+    200
+  );
 
-    new THREE.MeshStandardMaterial({
 
-        color:0x777777,
-
-        metalness:1,
-
-        roughness:.15,
-
-        emissive:0x030303
-
-    })
-
+camera.position.set(
+  0,
+  0,
+  9
 );
 
-coreGroup.add(core);
+
+const renderer =
+  new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: "high-performance"
+  });
+
+
+renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio, 2)
+);
+
+
+renderer.setSize(
+  window.innerWidth,
+  window.innerHeight
+);
+
+
+renderer.outputEncoding =
+  THREE.sRGBEncoding;
+
+
+world.appendChild(renderer.domElement);
+
+
+/* =====================================================
+   MASTER WORLD
+===================================================== */
+
+const universe =
+  new THREE.Group();
+
+scene.add(universe);
+
+
+/* =====================================================
+   MAIN MORPHING OBJECT
+===================================================== */
+
+const object =
+  new THREE.Group();
+
+universe.add(object);
+
+
+/* -----------------------------------------------------
+   MATERIAL
+----------------------------------------------------- */
+
+const material =
+  new THREE.MeshPhysicalMaterial({
+    color: 0x111111,
+    metalness: .95,
+    roughness: .17,
+    clearcoat: 1,
+    clearcoatRoughness: .08
+  });
+
+
+/* -----------------------------------------------------
+   SPHERE
+----------------------------------------------------- */
+
+const sphere =
+  new THREE.Mesh(
+    new THREE.IcosahedronGeometry(
+      1.55,
+      4
+    ),
+    material
+  );
+
+
+object.add(sphere);
+
+
+/* -----------------------------------------------------
+   CUBE
+----------------------------------------------------- */
+
+const cube =
+  new THREE.Mesh(
+    new THREE.BoxGeometry(
+      2.7,
+      2.7,
+      2.7,
+      5,
+      5,
+      5
+    ),
+    material
+  );
+
+
+cube.scale.setScalar(.001);
+
+object.add(cube);
+
+
+/* -----------------------------------------------------
+   TORUS KNOT
+----------------------------------------------------- */
+
+const knot =
+  new THREE.Mesh(
+    new THREE.TorusKnotGeometry(
+      1.2,
+      .28,
+      160,
+      32,
+      2,
+      3
+    ),
+    material
+  );
+
+
+knot.scale.setScalar(.001);
+
+object.add(knot);
+
+
+/* -----------------------------------------------------
+   TETRAHEDRON
+----------------------------------------------------- */
+
+const tetra =
+  new THREE.Mesh(
+    new THREE.TetrahedronGeometry(
+      1.9,
+      3
+    ),
+    material
+  );
+
+
+tetra.scale.setScalar(.001);
+
+object.add(tetra);
+
+
+/* =====================================================
+   INNER ENERGY
+===================================================== */
 
 const inner =
-new THREE.Mesh(
-
+  new THREE.Mesh(
     new THREE.IcosahedronGeometry(
-        1.08,
-        4
+      .65,
+      2
     ),
-
-    new THREE.MeshStandardMaterial({
-
-        color:0x050505,
-
-        metalness:1,
-
-        roughness:.1
-
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      wireframe: true,
+      transparent: true,
+      opacity: .32
     })
+  );
 
-);
 
-coreGroup.add(inner);
+object.add(inner);
 
 
-/* =========================================================
-GAME CARD DATA
-========================================================= */
+/* =====================================================
+   PARTICLE FIELD
+===================================================== */
 
-const games = [
-
-    {
-        title:"RUN RUSH",
-        type:"runner",
-        a:"#ff7043",
-        b:"#6a1b9a"
-    },
-
-    {
-        title:"TEMPLE TRAIL",
-        type:"temple",
-        a:"#d88924",
-        b:"#182f1d"
-    },
-
-    {
-        title:"NITRO CITY",
-        type:"racing",
-        a:"#111827",
-        b:"#e11d48"
-    },
-
-    {
-        title:"SHADOW NINJA",
-        type:"ninja",
-        a:"#151525",
-        b:"#7048e8"
-    },
-
-    {
-        title:"LAST STAND",
-        type:"zombie",
-        a:"#18251d",
-        b:"#9f3b25"
-    },
-
-    {
-        title:"GOAL!",
-        type:"football",
-        a:"#087f5b",
-        b:"#0b7285"
-    },
-
-    {
-        title:"SKY QUEST",
-        type:"fantasy",
-        a:"#4c1d95",
-        b:"#0ea5e9"
-    },
-
-    {
-        title:"PIXEL JUMP",
-        type:"platform",
-        a:"#2563eb",
-        b:"#f59e0b"
-    },
-
-    {
-        title:"DRIFT X",
-        type:"drift",
-        a:"#111827",
-        b:"#06b6d4"
-    },
-
-    {
-        title:"SPACE RAID",
-        type:"space",
-        a:"#09090b",
-        b:"#7c3aed"
-    },
-
-    {
-        title:"BLOCK LAB",
-        type:"puzzle",
-        a:"#f97316",
-        b:"#2563eb"
-    },
-
-    {
-        title:"DRAGON AGE",
-        type:"dragon",
-        a:"#7f1d1d",
-        b:"#f59e0b"
-    },
-
-    {
-        title:"TOWER UP",
-        type:"strategy",
-        a:"#334155",
-        b:"#22c55e"
-    },
-
-    {
-        title:"ICE RUN",
-        type:"ice",
-        a:"#0369a1",
-        b:"#a5f3fc"
-    }
-
-];
-
-
-/* =========================================================
-CANVAS TEXTURE CREATOR
-========================================================= */
-
-function createGameTexture(game){
-
-    const c =
-    document.createElement("canvas");
-
-    c.width=700;
-    c.height=450;
-
-    const ctx =
-    c.getContext("2d");
-
-    /* background */
-
-    const gradient =
-    ctx.createLinearGradient(
-        0,0,
-        700,450
-    );
-
-    gradient.addColorStop(
-        0,
-        game.a
-    );
-
-    gradient.addColorStop(
-        1,
-        game.b
-    );
-
-    ctx.fillStyle=gradient;
-
-    ctx.fillRect(
-        0,0,
-        700,450
-    );
-
-
-    /* atmosphere */
-
-    ctx.globalAlpha=.18;
-
-    for(
-        let i=0;
-        i<18;
-        i++
-    ){
-
-        ctx.beginPath();
-
-        ctx.arc(
-            Math.random()*700,
-            Math.random()*450,
-            30+Math.random()*100,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fillStyle="#ffffff";
-
-        ctx.fill();
-
-    }
-
-    ctx.globalAlpha=1;
-
-
-    /* draw scene */
-
-    drawGameScene(
-        ctx,
-        game.type
-    );
-
-
-    /* dark bottom */
-
-    const bottom =
-    ctx.createLinearGradient(
-        0,260,
-        0,450
-    );
-
-    bottom.addColorStop(
-        0,
-        "rgba(0,0,0,0)"
-    );
-
-    bottom.addColorStop(
-        1,
-        "rgba(0,0,0,.85)"
-    );
-
-    ctx.fillStyle=bottom;
-
-    ctx.fillRect(
-        0,250,
-        700,200
-    );
-
-
-    /* title */
-
-    ctx.fillStyle="#ffffff";
-
-    ctx.font=
-    "800 38px Arial";
-
-    ctx.letterSpacing="3px";
-
-    ctx.fillText(
-        game.title,
-        34,
-        405
-    );
-
-
-    /* tiny genre mark */
-
-    ctx.font=
-    "600 12px Arial";
-
-    ctx.fillStyle=
-    "rgba(255,255,255,.7)";
-
-    ctx.fillText(
-        "PLAYZO ORIGINAL",
-        36,
-        428
-    );
-
-
-    return new THREE.CanvasTexture(c);
-}
-
-
-/* =========================================================
-GAME SCENE DRAWING
-========================================================= */
-
-function drawGameScene(
-    ctx,
-    type
-){
-
-    /* ---------------- RUNNER ---------------- */
-
-    if(type==="runner"){
-
-        /* road */
-
-        ctx.fillStyle=
-        "rgba(20,20,25,.75)";
-
-        ctx.beginPath();
-
-        ctx.moveTo(240,450);
-        ctx.lineTo(340,170);
-        ctx.lineTo(430,450);
-
-        ctx.fill();
-
-
-        /* lane */
-
-        ctx.strokeStyle=
-        "rgba(255,255,255,.5)";
-
-        ctx.lineWidth=8;
-
-        ctx.setLineDash([
-            25,
-            25
-        ]);
-
-        ctx.beginPath();
-
-        ctx.moveTo(350,430);
-        ctx.lineTo(355,210);
-
-        ctx.stroke();
-
-        ctx.setLineDash([]);
-
-
-        /* runner head */
-
-        ctx.fillStyle="#f5c7a9";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            350,
-            190,
-            27,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        /* body */
-
-        ctx.fillStyle="#18a0fb";
-
-        ctx.fillRect(
-            325,
-            218,
-            50,
-            85
-        );
-
-
-        /* arms */
-
-        ctx.strokeStyle="#f5c7a9";
-
-        ctx.lineWidth=18;
-
-        ctx.beginPath();
-
-        ctx.moveTo(330,230);
-        ctx.lineTo(285,275);
-
-        ctx.moveTo(370,230);
-        ctx.lineTo(420,265);
-
-        ctx.stroke();
-
-
-        /* legs */
-
-        ctx.strokeStyle="#222";
-
-        ctx.lineWidth=20;
-
-        ctx.beginPath();
-
-        ctx.moveTo(338,300);
-        ctx.lineTo(305,370);
-
-        ctx.moveTo(363,300);
-        ctx.lineTo(400,370);
-
-        ctx.stroke();
-
-
-        /* obstacles */
-
-        ctx.fillStyle="#ffcc00";
-
-        ctx.fillRect(
-            200,315,
-            60,40
-        );
-
-        ctx.fillRect(
-            455,280,
-            60,40
-        );
-
-    }
-
-
-    /* ---------------- TEMPLE ---------------- */
-
-    if(type==="temple"){
-
-        /* sky */
-
-        ctx.fillStyle="#e9b949";
-
-        ctx.fillRect(
-            0,0,
-            700,220
-        );
-
-
-        /* mountains */
-
-        ctx.fillStyle="#254d32";
-
-        ctx.beginPath();
-
-        ctx.moveTo(0,250);
-
-        ctx.lineTo(150,80);
-
-        ctx.lineTo(280,250);
-
-        ctx.lineTo(420,60);
-
-        ctx.lineTo(700,250);
-
-        ctx.fill();
-
-
-        /* temple */
-
-        ctx.fillStyle="#b97832";
-
-        ctx.fillRect(
-            240,125,
-            220,170
-        );
-
-        /* roof */
-
-        ctx.beginPath();
-
-        ctx.moveTo(205,135);
-        ctx.lineTo(350,55);
-        ctx.lineTo(495,135);
-
-        ctx.fill();
-
-
-        /* pillars */
-
-        ctx.fillStyle="#e4b76a";
-
-        for(
-            let x=260;
-            x<460;
-            x+=55
-        ){
-
-            ctx.fillRect(
-                x,150,
-                25,145
-            );
-
-        }
-
-
-        /* hero */
-
-        ctx.fillStyle="#dfaa7c";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            350,280,
-            24,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillStyle="#263238";
-
-        ctx.fillRect(
-            330,300,
-            40,80
-        );
-
-        ctx.strokeStyle="#dfaa7c";
-
-        ctx.lineWidth=14;
-
-        ctx.beginPath();
-
-        ctx.moveTo(335,315);
-        ctx.lineTo(300,350);
-
-        ctx.moveTo(365,315);
-        ctx.lineTo(400,350);
-
-        ctx.stroke();
-
-    }
-
-
-    /* ---------------- RACING ---------------- */
-
-    if(type==="racing"){
-
-        /* road */
-
-        ctx.fillStyle="#252525";
-
-        ctx.beginPath();
-
-        ctx.moveTo(80,450);
-        ctx.lineTo(260,140);
-        ctx.lineTo(450,140);
-        ctx.lineTo(630,450);
-
-        ctx.fill();
-
-
-        /* horizon */
-
-        ctx.fillStyle="#ef4444";
-
-        ctx.fillRect(
-            0,135,
-            700,8
-        );
-
-
-        /* speed lines */
-
-        ctx.strokeStyle=
-        "rgba(255,255,255,.45)";
-
-        ctx.lineWidth=5;
-
-        for(
-            let i=0;
-            i<8;
-            i++
-        ){
-
-            const x=
-            90+i*75;
-
-            ctx.beginPath();
-
-            ctx.moveTo(x,180);
-            ctx.lineTo(
-                x-70,
-                440
-            );
-
-            ctx.stroke();
-
-        }
-
-
-        /* car */
-
-        ctx.fillStyle="#f43f5e";
-
-        ctx.beginPath();
-
-        ctx.moveTo(245,330);
-        ctx.lineTo(280,275);
-        ctx.lineTo(430,275);
-        ctx.lineTo(465,330);
-        ctx.closePath();
-
-        ctx.fill();
-
-
-        /* windows */
-
-        ctx.fillStyle="#111827";
-
-        ctx.beginPath();
-
-        ctx.moveTo(300,275);
-        ctx.lineTo(330,245);
-        ctx.lineTo(390,245);
-        ctx.lineTo(420,275);
-
-        ctx.fill();
-
-
-        /* wheels */
-
-        ctx.fillStyle="#050505";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            285,335,
-            30,
-            0,
-            Math.PI*2
-        );
-
-        ctx.arc(
-            425,335,
-            30,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-    }
-
-
-    /* ---------------- NINJA ---------------- */
-
-    if(type==="ninja"){
-
-        /* moon */
-
-        ctx.fillStyle="#d8d4ff";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            530,90,
-            60,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        /* buildings */
-
-        ctx.fillStyle="#101020";
-
-        for(
-            let i=0;
-            i<8;
-            i++
-        ){
-
-            ctx.fillRect(
-                i*95,
-                180+Math.random()*60,
-                80,
-                270
-            );
-
-        }
-
-
-        /* ninja */
-
-        ctx.fillStyle="#050505";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            350,210,
-            35,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillRect(
-            315,245,
-            70,
-            120
-        );
-
-
-        /* eyes */
-
-        ctx.fillStyle="#a78bfa";
-
-        ctx.fillRect(
-            325,205,
-            16,7
-        );
-
-        ctx.fillRect(
-            360,205,
-            16,7
-        );
-
-
-        /* sword */
-
-        ctx.strokeStyle="#ddd";
-
-        ctx.lineWidth=8;
-
-        ctx.beginPath();
-
-        ctx.moveTo(390,280);
-        ctx.lineTo(490,160);
-
-        ctx.stroke();
-
-    }
-
-
-    /* ---------------- ZOMBIE ---------------- */
-
-    if(type==="zombie"){
-
-        /* city */
-
-        ctx.fillStyle="#17251b";
-
-        for(
-            let i=0;
-            i<9;
-            i++
-        ){
-
-            ctx.fillRect(
-                i*85,
-                140+Math.random()*80,
-                70,
-                300
-            );
-
-        }
-
-
-        /* moon */
-
-        ctx.fillStyle="#d7e3b5";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            530,80,
-            50,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        /* zombie */
-
-        ctx.fillStyle="#78a86b";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            350,220,
-            35,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-        ctx.fillRect(
-            315,250,
-            70,
-            120
-        );
-
-
-        /* arms */
-
-        ctx.strokeStyle="#78a86b";
-
-        ctx.lineWidth=20;
-
-        ctx.beginPath();
-
-        ctx.moveTo(320,270);
-        ctx.lineTo(250,310);
-
-        ctx.moveTo(380,270);
-        ctx.lineTo(450,310);
-
-        ctx.stroke();
-
-
-        /* eyes */
-
-        ctx.fillStyle="#ff4444";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            337,215,
-            6,
-            0,
-            Math.PI*2
-        );
-
-        ctx.arc(
-            365,215,
-            6,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-    }
-
-
-    /* ---------------- FOOTBALL ---------------- */
-
-    if(type==="football"){
-
-        /* field */
-
-        ctx.fillStyle="#16805c";
-
-        ctx.fillRect(
-            0,120,
-            700,330
-        );
-
-
-        /* lines */
-
-        ctx.strokeStyle=
-        "rgba(255,255,255,.65)";
-
-        ctx.lineWidth=5;
-
-        ctx.strokeRect(
-            50,160,
-            600,260
-        );
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            350,160
-        );
-
-        ctx.lineTo(
-            350,420
-        );
-
-        ctx.stroke();
-
-
-        ctx.beginPath();
-
-        ctx.arc(
-            350,290,
-            50,
-            0,
-            Math.PI*2
-        );
-
-        ctx.stroke();
-
-
-        /* player */
-
-        ctx.fillStyle="#ffccaa";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            350,210,
-            28,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        ctx.fillStyle="#f8fafc";
-
-        ctx.fillRect(
-            325,240,
-            50,80
-        );
-
-
-        ctx.strokeStyle="#f8fafc";
-
-        ctx.lineWidth=18;
-
-        ctx.beginPath();
-
-        ctx.moveTo(335,310);
-        ctx.lineTo(300,390);
-
-        ctx.moveTo(365,310);
-        ctx.lineTo(405,390);
-
-        ctx.stroke();
-
-
-        /* ball */
-
-        ctx.fillStyle="#fff";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            450,350,
-            28,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-    }
-
-
-    /* ---------------- FANTASY ---------------- */
-
-    if(type==="fantasy"){
-
-        /* sky */
-
-        ctx.fillStyle="#312e81";
-
-        ctx.fillRect(
-            0,0,
-            700,450
-        );
-
-
-        /* stars */
-
-        ctx.fillStyle="#fff";
-
-        for(
-            let i=0;
-            i<35;
-            i++
-        ){
-
-            ctx.beginPath();
-
-            ctx.arc(
-                Math.random()*700,
-                Math.random()*250,
-                2,
-                0,
-                Math.PI*2
-            );
-
-            ctx.fill();
-
-        }
-
-
-        /* castle */
-
-        ctx.fillStyle="#8b7bbd";
-
-        ctx.fillRect(
-            270,170,
-            180,200
-        );
-
-
-        for(
-            let x=270;
-            x<=430;
-            x+=70
-        ){
-
-            ctx.fillRect(
-                x,110,
-                45,100
-            );
-
-        }
-
-
-        /* hero */
-
-        ctx.fillStyle="#d9a27e";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            350,220,
-            27,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        ctx.fillStyle="#7c3aed";
-
-        ctx.fillRect(
-            320,250,
-            60,120
-        );
-
-
-        /* sword */
-
-        ctx.strokeStyle="#eee";
-
-        ctx.lineWidth=8;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            380,285
-        );
-
-        ctx.lineTo(
-            475,190
-        );
-
-        ctx.stroke();
-
-    }
-
-
-    /* ---------------- PLATFORM ---------------- */
-
-    if(type==="platform"){
-
-        ctx.fillStyle="#38bdf8";
-
-        ctx.fillRect(
-            0,0,
-            700,450
-        );
-
-
-        /* clouds */
-
-        ctx.fillStyle=
-        "rgba(255,255,255,.65)";
-
-        for(
-            let i=0;
-            i<5;
-            i++
-        ){
-
-            ctx.beginPath();
-
-            ctx.arc(
-                80+i*150,
-                110+Math.random()*60,
-                35,
-                0,
-                Math.PI*2
-            );
-
-            ctx.fill();
-
-        }
-
-
-        /* platforms */
-
-        ctx.fillStyle="#f59e0b";
-
-        ctx.fillRect(
-            70,360,
-            180,25
-        );
-
-        ctx.fillRect(
-            310,290,
-            160,25
-        );
-
-        ctx.fillRect(
-            500,220,
-            130,25
-        );
-
-
-        /* character */
-
-        ctx.fillStyle="#ef4444";
-
-        ctx.fillRect(
-            330,225,
-            45,60
-        );
-
-        ctx.beginPath();
-
-        ctx.arc(
-            352,205,
-            22,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-    }
-
-
-    /* ---------------- DRIFT ---------------- */
-
-    if(type==="drift"){
-
-        ctx.fillStyle="#111827";
-
-        ctx.fillRect(
-            0,0,
-            700,450
-        );
-
-
-        /* neon road */
-
-        ctx.strokeStyle="#06b6d4";
-
-        ctx.lineWidth=60;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            50,400
-        );
-
-        ctx.bezierCurveTo(
-            180,320,
-            400,400,
-            650,130
-        );
-
-        ctx.stroke();
-
-
-        /* car */
-
-        ctx.save();
-
-        ctx.translate(
-            350,
-            290
-        );
-
-        ctx.rotate(
-            -.2
-        );
-
-        ctx.fillStyle="#22d3ee";
-
-        ctx.fillRect(
-            -80,
-            -35,
-            160,
-            70
-        );
-
-        ctx.fillStyle="#111";
-
-        ctx.fillRect(
-            -50,
-            -60,
-            100,
-            35
-        );
-
-        ctx.fillStyle="#000";
-
-        ctx.fillRect(
-            -60,25,
-            30,25
-        );
-
-        ctx.fillRect(
-            30,25,
-            30,25
-        );
-
-        ctx.restore();
-
-    }
-
-
-    /* ---------------- SPACE ---------------- */
-
-    if(type==="space"){
-
-        ctx.fillStyle="#050510";
-
-        ctx.fillRect(
-            0,0,
-            700,450
-        );
-
-
-        /* stars */
-
-        ctx.fillStyle="#fff";
-
-        for(
-            let i=0;
-            i<80;
-            i++
-        ){
-
-            ctx.fillRect(
-                Math.random()*700,
-                Math.random()*450,
-                2,
-                2
-            );
-
-        }
-
-
-        /* planet */
-
-        ctx.fillStyle="#5b21b6";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            540,320,
-            100,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        /* spaceship */
-
-        ctx.fillStyle="#e5e7eb";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            350,140
-        );
-
-        ctx.lineTo(
-            410,270
-        );
-
-        ctx.lineTo(
-            350,245
-        );
-
-        ctx.lineTo(
-            290,270
-        );
-
-        ctx.closePath();
-
-        ctx.fill();
-
-
-        /* engine */
-
-        ctx.fillStyle="#22d3ee";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            320,255
-        );
-
-        ctx.lineTo(
-            350,340
-        );
-
-        ctx.lineTo(
-            380,255
-        );
-
-        ctx.fill();
-
-    }
-
-
-    /* ---------------- PUZZLE ---------------- */
-
-    if(type==="puzzle"){
-
-        ctx.fillStyle="#f97316";
-
-        ctx.fillRect(
-            0,0,
-            700,450
-        );
-
-
-        const colors=[
-            "#2563eb",
-            "#22c55e",
-            "#facc15",
-            "#ef4444",
-            "#a855f7"
-        ];
-
-
-        let n=0;
-
-        for(
-            let y=150;
-            y<380;
-            y+=65
-        ){
-
-            for(
-                let x=170;
-                x<530;
-                x+=65
-            ){
-
-                ctx.fillStyle=
-                colors[n%colors.length];
-
-                ctx.fillRect(
-                    x,y,
-                    55,55
-                );
-
-                n++;
-
-            }
-
-        }
-
-    }
-
-
-    /* ---------------- DRAGON ---------------- */
-
-    if(type==="dragon"){
-
-        ctx.fillStyle="#581c1c";
-
-        ctx.fillRect(
-            0,0,
-            700,450
-        );
-
-
-        /* mountains */
-
-        ctx.fillStyle="#2f1010";
-
-        ctx.beginPath();
-
-        ctx.moveTo(0,350);
-
-        ctx.lineTo(160,100);
-
-        ctx.lineTo(300,350);
-
-        ctx.lineTo(450,70);
-
-        ctx.lineTo(700,350);
-
-        ctx.fill();
-
-
-        /* dragon */
-
-        ctx.fillStyle="#dc2626";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            400,210,
-            55,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            350,210
-        );
-
-        ctx.lineTo(
-            250,160
-        );
-
-        ctx.lineTo(
-            300,260
-        );
-
-        ctx.fill();
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            440,210
-        );
-
-        ctx.lineTo(
-            550,160
-        );
-
-        ctx.lineTo(
-            500,260
-        );
-
-        ctx.fill();
-
-
-        /* fire */
-
-        ctx.fillStyle="#facc15";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            350,230
-        );
-
-        ctx.lineTo(
-            200,290
-        );
-
-        ctx.lineTo(
-            340,270
-        );
-
-        ctx.fill();
-
-    }
-
-
-    /* ---------------- STRATEGY ---------------- */
-
-    if(type==="strategy"){
-
-        ctx.fillStyle="#334155";
-
-        ctx.fillRect(
-            0,0,
-            700,450
-        );
-
-
-        /* map */
-
-        ctx.fillStyle="#22c55e";
-
-        ctx.fillRect(
-            100,120,
-            500,280
-        );
-
-
-        /* roads */
-
-        ctx.strokeStyle="#e2e8f0";
-
-        ctx.lineWidth=28;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            100,250
-        );
-
-        ctx.lineTo(
-            600,250
-        );
-
-        ctx.moveTo(
-            350,120
-        );
-
-        ctx.lineTo(
-            350,400
-        );
-
-        ctx.stroke();
-
-
-        /* buildings */
-
-        const buildingColors=[
-            "#f8fafc",
-            "#94a3b8",
-            "#64748b"
-        ];
-
-        for(
-            let i=0;
-            i<12;
-            i++
-        ){
-
-            ctx.fillStyle=
-            buildingColors[
-                i%3
-            ];
-
-            ctx.fillRect(
-                130+(i%4)*120,
-                150+Math.floor(i/4)*80,
-                55,
-                45
-            );
-
-        }
-
-    }
-
-
-    /* ---------------- ICE ---------------- */
-
-    if(type==="ice"){
-
-        ctx.fillStyle="#0284c7";
-
-        ctx.fillRect(
-            0,0,
-            700,450
-        );
-
-
-        /* ice mountains */
-
-        ctx.fillStyle="#e0f2fe";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            0,300
-        );
-
-        ctx.lineTo(
-            180,80
-        );
-
-        ctx.lineTo(
-            330,300
-        );
-
-        ctx.lineTo(
-            500,70
-        );
-
-        ctx.lineTo(
-            700,300
-        );
-
-        ctx.fill();
-
-
-        /* runner */
-
-        ctx.fillStyle="#0f172a";
-
-        ctx.fillRect(
-            335,240,
-            35,100
-        );
-
-        ctx.beginPath();
-
-        ctx.arc(
-            352,215,
-            22,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        /* snow */
-
-        ctx.fillStyle="#fff";
-
-        for(
-            let i=0;
-            i<50;
-            i++
-        ){
-
-            ctx.beginPath();
-
-            ctx.arc(
-                Math.random()*700,
-                Math.random()*450,
-                3,
-                0,
-                Math.PI*2
-            );
-
-            ctx.fill();
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-CREATE 3D GAME CARDS
-========================================================= */
-
-const gameWorld =
-new THREE.Group();
-
-world.add(gameWorld);
-
-const gameCards=[];
-
-
-function createGameCard(
-    game,
-    index
-){
-
-    const group =
-    new THREE.Group();
-
-
-    /* card dimensions */
-
-    const width =
-    2.25;
-
-    const height =
-    1.45;
-
-
-    /* actual image */
-
-    const texture =
-    createGameTexture(
-        game
-    );
-
-
-    const front =
-    new THREE.Mesh(
-
-        new THREE.PlaneGeometry(
-            width,
-            height
-        ),
-
-        new THREE.MeshBasicMaterial({
-            map:texture,
-            transparent:true
-        })
-
-    );
-
-
-    front.position.z=.08;
-
-    group.add(front);
-
-
-    /* black depth */
-
-    const back =
-    new THREE.Mesh(
-
-        new THREE.BoxGeometry(
-            width,
-            height,
-            .14
-        ),
-
-        new THREE.MeshStandardMaterial({
-
-            color:0x090909,
-
-            metalness:.4,
-
-            roughness:.25
-
-        })
-
-    );
-
-    group.add(back);
-
-
-    /* thin border */
-
-    const border =
-    new THREE.LineSegments(
-
-        new THREE.EdgesGeometry(
-            new THREE.BoxGeometry(
-                width,
-                height,
-                .16
-            )
-        ),
-
-        new THREE.LineBasicMaterial({
-            color:0xffffff,
-            transparent:true,
-            opacity:.35
-        })
-
-    );
-
-    group.add(border);
-
-
-    /*
-       START POSITION
-       hidden deep inside
-    */
-
-    group.position.set(
-
-        (Math.random()-.5)*2,
-
-        (Math.random()-.5)*2,
-
-        -12-index*.45
-
-    );
-
-
-    group.rotation.set(
-
-        (Math.random()-.5)*1.5,
-
-        (Math.random()-.5)*1.5,
-
-        (Math.random()-.5)*1.5
-
-    );
-
-
-    group.scale.set(
-        .15,
-        .15,
-        .15
-    );
-
-
-    gameWorld.add(group);
-
-    gameCards.push(group);
-
-}
-
-
-games.forEach(
-    (game,index)=>{
-        createGameCard(
-            game,
-            index
-        );
-    }
-);
-
-
-/* =========================================================
-CARD TARGET POSITIONS
-========================================================= */
-
-const targets=[
-
-    [-4.7,2.1,1.0],
-    [-2.8,-1.8,1.7],
-    [-1.0,2.8,.2],
-    [1.1,2.0,1.4],
-    [4.3,2.2,.5],
-    [4.5,-.4,1.8],
-    [2.8,-2.2,.5],
-    [.3,-2.6,2],
-    [-2.2,-2.6,.7],
-    [-4.5,-.5,1.5],
-    [-.4,.2,2.5],
-    [2.1,.2,.4],
-    [-1.5,.7,.9],
-    [4.7,1.3,-1]
-
-];
-
-
-/* =========================================================
-PARTICLES
-========================================================= */
-
-const particleCount=1800;
+const particleCount = 1300;
 
 const positions =
-new Float32Array(
-    particleCount*3
-);
+  new Float32Array(
+    particleCount * 3
+  );
 
-for(
-    let i=0;
-    i<particleCount;
-    i++
-){
 
-    const radius=
-    5+Math.random()*18;
+const particleHome =
+  new Float32Array(
+    particleCount * 3
+  );
 
-    const theta=
-    Math.random()*Math.PI*2;
 
-    const phi=
+for(let i=0;i<particleCount;i++){
+
+  const radius =
+    3 +
+    Math.random() * 9;
+
+  const theta =
+    Math.random() *
+    Math.PI *
+    2;
+
+  const phi =
     Math.acos(
-        2*Math.random()-1
+      2 * Math.random() - 1
     );
 
-    positions[i*3]=
-    radius*
-    Math.sin(phi)*
+
+  const x =
+    radius *
+    Math.sin(phi) *
     Math.cos(theta);
 
-    positions[i*3+1]=
-    radius*
-    Math.sin(phi)*
+  const y =
+    radius *
+    Math.sin(phi) *
     Math.sin(theta);
 
-    positions[i*3+2]=
-    radius*
+  const z =
+    radius *
     Math.cos(phi);
 
+
+  positions[i*3] = x;
+  positions[i*3+1] = y;
+  positions[i*3+2] = z;
+
+  particleHome[i*3] = x;
+  particleHome[i*3+1] = y;
+  particleHome[i*3+2] = z;
 }
+
 
 const particleGeometry =
-new THREE.BufferGeometry();
+  new THREE.BufferGeometry();
+
 
 particleGeometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(
-        positions,
-        3
-    )
+  "position",
+  new THREE.BufferAttribute(
+    positions,
+    3
+  )
 );
+
 
 const particleMaterial =
-new THREE.PointsMaterial({
+  new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: .018,
+    transparent: true,
+    opacity: .38,
+    depthWrite: false
+  });
 
-    color:0xffffff,
-
-    size:.017,
-
-    transparent:true,
-
-    opacity:.3
-
-});
 
 const particles =
-new THREE.Points(
+  new THREE.Points(
     particleGeometry,
     particleMaterial
+  );
+
+
+universe.add(particles);
+
+
+/* =====================================================
+   CONSTRUCTION FRAGMENTS
+===================================================== */
+
+const fragments =
+  new THREE.Group();
+
+universe.add(fragments);
+
+
+const fragmentMeshes = [];
+
+
+for(let i=0;i<90;i++){
+
+  const size =
+    .025 +
+    Math.random()*.07;
+
+
+  const mesh =
+    new THREE.Mesh(
+      new THREE.BoxGeometry(
+        size,
+        size,
+        size
+      ),
+      new THREE.MeshStandardMaterial({
+        color: 0x333333,
+        metalness: .8,
+        roughness: .25
+      })
+    );
+
+
+  const radius =
+    2.5 +
+    Math.random()*4;
+
+
+  const angle =
+    Math.random() *
+    Math.PI *
+    2;
+
+
+  mesh.position.set(
+    Math.cos(angle)*radius,
+    (Math.random()-.5)*5,
+    Math.sin(angle)*radius
+  );
+
+
+  mesh.userData.home =
+    mesh.position.clone();
+
+
+  mesh.userData.random =
+    Math.random();
+
+
+  fragments.add(mesh);
+
+  fragmentMeshes.push(mesh);
+}
+
+
+/* =====================================================
+   LIGHTING
+===================================================== */
+
+scene.add(
+  new THREE.AmbientLight(
+    0xffffff,
+    .18
+  )
 );
 
-world.add(particles);
+
+const light =
+  new THREE.PointLight(
+    0xffffff,
+    40,
+    40
+  );
 
 
-/* =========================================================
-MOUSE
-========================================================= */
+light.position.set(
+  4,
+  4,
+  7
+);
 
-let mouseX=0;
-let mouseY=0;
 
-let targetMouseX=0;
-let targetMouseY=0;
+scene.add(light);
+
+
+const light2 =
+  new THREE.PointLight(
+    0x777777,
+    15,
+    30
+  );
+
+
+light2.position.set(
+  -5,
+  -3,
+  2
+);
+
+
+scene.add(light2);
+
+
+/* =====================================================
+   MOUSE
+===================================================== */
+
+let mouseX = 0;
+let mouseY = 0;
+
 
 window.addEventListener(
-    "mousemove",
-    e=>{
+  "pointermove",
+  event => {
 
-        targetMouseX=
-        e.clientX/innerWidth-.5;
+    mouseX =
+      event.clientX /
+      window.innerWidth -
+      .5;
 
-        targetMouseY=
-        e.clientY/innerHeight-.5;
+    mouseY =
+      event.clientY /
+      window.innerHeight -
+      .5;
+
+  }
+);
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function render(){
+
+  requestAnimationFrame(
+    render
+  );
+
+
+  const time =
+    performance.now() *
+    .0005;
+
+
+  /* main object */
+
+  sphere.rotation.x += .0015;
+  sphere.rotation.y += .0025;
+
+
+  cube.rotation.x += .001;
+  cube.rotation.y += .0015;
+
+
+  knot.rotation.x += .002;
+  knot.rotation.y -= .002;
+
+
+  tetra.rotation.y += .002;
+
+
+  inner.rotation.x -= .002;
+  inner.rotation.y -= .003;
+
+
+  /* fragments */
+
+  fragmentMeshes.forEach(
+    (mesh,i)=>{
+
+      mesh.rotation.x +=
+        .002 +
+        mesh.userData.random*.003;
+
+      mesh.rotation.y +=
+        .001 +
+        mesh.userData.random*.002;
 
     }
-);
+  );
 
 
-/* =========================================================
-TEXT ELEMENTS
-========================================================= */
+  /* subtle breathing */
 
-const hero=
-document.getElementById("hero");
+  universe.position.x +=
+    (
+      mouseX*.3 -
+      universe.position.x
+    )*.02;
 
-const build=
-document.getElementById("build");
 
-const play=
-document.getElementById("play");
+  universe.position.y +=
+    (
+      -mouseY*.2 -
+      universe.position.y
+    )*.02;
 
-const explore=
-document.getElementById("explore");
 
-const final=
-document.getElementById("final");
+  /* camera */
 
+  camera.position.x +=
+    (
+      mouseX*.25 -
+      camera.position.x
+    )*.015;
 
-/* =========================================================
-SCROLL TIMELINE
-========================================================= */
 
-gsap.registerPlugin(
-    ScrollTrigger
-);
+  camera.position.y +=
+    (
+      -mouseY*.18 -
+      camera.position.y
+    )*.015;
 
 
-const timeline=
-gsap.timeline({
-
-    scrollTrigger:{
-
-        trigger:"#scroll",
-
-        start:"top top",
-
-        end:"bottom bottom",
-
-        scrub:1.15
-
-    }
-
-});
-
-
-/* =========================================================
-1 — HERO
-========================================================= */
-
-timeline.to(
-    coreGroup.position,
-    {
-        z:1.5,
-        y:-.3,
-        duration:1
-    }
-);
-
-timeline.to(
-    coreGroup.scale,
-    {
-        x:1.3,
-        y:1.3,
-        z:1.3,
-        duration:1
-    },
-    "<"
-);
-
-timeline.to(
-    camera.position,
-    {
-        z:6,
-        duration:1
-    },
-    "<"
-);
-
-
-/* =========================================================
-2 — STRIPZO → BUILD
-========================================================= */
-
-timeline.to(
-    coreGroup.position,
-    {
-        z:8,
-        x:2,
-        duration:1
-    }
-);
-
-timeline.to(
-    coreGroup.rotation,
-    {
-        x:Math.PI*2,
-        y:Math.PI*3,
-        duration:1
-    },
-    "<"
-);
-
-timeline.to(
-    hero,
-    {
-        opacity:0,
-        y:-150,
-        scale:.7,
-        duration:.6
-    },
-    "<"
-);
-
-timeline.to(
-    build,
-    {
-        opacity:1,
-        y:0,
-        scale:1,
-        duration:.7
-    }
-);
-
-
-/* =========================================================
-3 — BUILD FLOATS AWAY
-========================================================= */
-
-timeline.to(
-    coreGroup.scale,
-    {
-        x:.45,
-        y:.45,
-        z:.45,
-        duration:1
-    }
-);
-
-timeline.to(
-    coreGroup.position,
-    {
-        x:-2,
-        y:3,
-        z:-4,
-        duration:1
-    },
-    "<"
-);
-
-timeline.to(
-    build,
-    {
-        opacity:0,
-        y:-120,
-        duration:.5
-    }
-);
-
-
-/* =========================================================
-4 — ENTER GAME WORLD
-========================================================= */
-
-timeline.to(
-    camera.position,
-    {
-        z:4,
-        x:0,
-        y:0,
-        duration:.8
-    }
-);
-
-
-/* =========================================================
-5 — POPCORN GAME EXPLOSION
-========================================================= */
-
-gameCards.forEach(
-    (card,index)=>{
-
-        const target=
-        targets[index];
-
-
-        /* POP */
-
-        timeline.to(
-            card.position,
-            {
-
-                x:target[0],
-
-                y:target[1],
-
-                z:target[2],
-
-                duration:
-                .34+
-                index*.035,
-
-                ease:
-                "back.out(2.1)"
-
-            },
-            index===0
-            ? "<"
-            : "-=.25"
-        );
-
-
-        /* scale POP */
-
-        timeline.to(
-            card.scale,
-            {
-
-                x:1,
-
-                y:1,
-
-                z:1,
-
-                duration:.32,
-
-                ease:
-                "back.out(3)"
-
-            },
-            "<"
-        );
-
-
-        /* rotation */
-
-        timeline.to(
-            card.rotation,
-            {
-
-                x:
-                (Math.random()-.5)
-                *1.2,
-
-                y:
-                (Math.random()-.5)
-                *1.2,
-
-                z:
-                (Math.random()-.5)
-                *1.4,
-
-                duration:.5
-
-            },
-            "<"
-        );
-
-    }
-);
-
-
-/* =========================================================
-6 — PLAYZO ARRIVES
-========================================================= */
-
-timeline.to(
-    play,
-    {
-        opacity:1,
-        y:0,
-        scale:1,
-        duration:.8
-    }
-);
-
-
-/* cards breathe */
-
-timeline.to(
-    gameWorld.rotation,
-    {
-        y:Math.PI*.18,
-        x:-.08,
-        duration:1
-    }
-);
-
-
-/* =========================================================
-7 — CARDS FLY PAST CAMERA
-========================================================= */
-
-gameCards.forEach(
-    (card,index)=>{
-
-        const direction=
-        index%2===0
-        ? 1
-        : -1;
-
-
-        timeline.to(
-            card.position,
-            {
-
-                x:
-                direction*
-                (5+
-                Math.random()*5),
-
-                y:
-                (Math.random()-.5)*7,
-
-                z:
-                5+
-                Math.random()*5,
-
-                duration:
-                .7+
-                Math.random()*.4,
-
-                ease:
-                "power3.in"
-
-            },
-            "-=.6"
-        );
-
-
-        timeline.to(
-            card.rotation,
-            {
-
-                x:
-                Math.random()*5,
-
-                y:
-                Math.random()*5,
-
-                z:
-                Math.random()*5,
-
-                duration:.8
-
-            },
-            "<"
-        );
-
-    }
-);
-
-
-/* =========================================================
-8 — PLAYZO DISAPPEARS
-========================================================= */
-
-timeline.to(
-    play,
-    {
-        opacity:0,
-        scale:1.18,
-        duration:.5
-    }
-);
-
-
-/* =========================================================
-9 — EXPLORE
-========================================================= */
-
-timeline.to(
-    explore,
-    {
-        opacity:1,
-        y:0,
-        scale:1,
-        duration:.8
-    }
-);
-
-timeline.to(
-    camera.position,
-    {
-        z:11,
-        duration:1.1
-    },
-    "<"
-);
-
-timeline.to(
-    particles.scale,
-    {
-        x:2,
-        y:2,
-        z:2,
-        duration:1
-    },
-    "<"
-);
-
-
-/* =========================================================
-10 — EXPLORE OUT
-========================================================= */
-
-timeline.to(
-    explore,
-    {
-        opacity:0,
-        y:-130,
-        duration:.6
-    }
-);
-
-
-/* =========================================================
-11 — FINAL WORLD COLLAPSE
-========================================================= */
-
-timeline.to(
-    gameWorld.position,
-    {
-        x:0,
-        y:0,
-        z:0,
-        duration:1
-    }
-);
-
-timeline.to(
-    coreGroup.position,
-    {
-        x:0,
-        y:0,
-        z:0,
-        duration:1
-    },
-    "<"
-);
-
-timeline.to(
-    coreGroup.scale,
-    {
-        x:1.7,
-        y:1.7,
-        z:1.7,
-        duration:1
-    },
-    "<"
-);
-
-timeline.to(
-    particles.scale,
-    {
-        x:.2,
-        y:.2,
-        z:.2,
-        duration:1
-    },
-    "<"
-);
-
-
-/* =========================================================
-12 — FINAL STRIPZO
-========================================================= */
-
-timeline.to(
-    final,
-    {
-        opacity:1,
-        y:0,
-        scale:1,
-        duration:.9
-    }
-);
-
-
-/* =========================================================
-RENDER
-========================================================= */
-
-const clock=
-new THREE.Clock();
-
-
-function animate(){
-
-    requestAnimationFrame(
-        animate
-    );
-
-    const time=
-    clock.getElapsedTime();
-
-
-    /* mouse */
-
-    mouseX +=
-    (targetMouseX-mouseX)*.035;
-
-    mouseY +=
-    (targetMouseY-mouseY)*.035;
-
-
-    camera.rotation.x=
-    mouseY*.035;
-
-    camera.rotation.y=
-    mouseX*.035;
-
-
-    /* core */
-
-    core.rotation.y+=.002;
-
-    inner.rotation.y-=.001;
-
-
-    /* cards */
-
-    gameCards.forEach(
-        (card,index)=>{
-
-            card.position.y+=
-            Math.sin(
-                time*.8+index
-            )*.0005;
-
-            card.rotation.z+=
-            Math.sin(
-                time*.5+index
-            )*.0003;
-
-        }
-    );
-
-
-    /* particles */
-
-    particles.rotation.y=
-    time*.012;
-
-
-    /* lights */
-
-    keyLight.position.x=
-    mouseX*8;
-
-    keyLight.position.y=
-    -mouseY*8;
-
-
-    renderer.render(
-        scene,
-        camera
-    );
+  renderer.render(
+    scene,
+    camera
+  );
 
 }
 
-animate();
+
+render();
 
 
-/* =========================================================
-PROGRESS
-========================================================= */
+/* =====================================================
+   INITIAL UI
+===================================================== */
 
-ScrollTrigger.create({
-
-    trigger:"#scroll",
-
-    start:"top top",
-
-    end:"bottom bottom",
-
-    onUpdate:self=>{
-
-        document
-        .getElementById(
-            "progressBar"
-        )
-        .style.height=
-        self.progress*100+"%";
-
-    }
-
-});
+gsap.set(
+  ".hero",
+  {
+    opacity: 1
+  }
+);
 
 
-/* =========================================================
-SCROLL HINT
-========================================================= */
+gsap.set(
+  [
+    ".build",
+    ".break",
+    ".evolve",
+    ".form",
+    ".project",
+    ".future",
+    ".final"
+  ],
+  {
+    opacity: 0
+  }
+);
 
-ScrollTrigger.create({
 
-    trigger:"#scroll",
+/* =====================================================
+   MASTER SCROLL TIMELINE
+===================================================== */
 
-    start:"5% top",
+const timeline =
+  gsap.timeline({
 
-    onEnter:()=>{
+    scrollTrigger: {
 
-        gsap.to(
-            "#scrollHint",
-            {
-                opacity:0,
-                duration:.4
-            }
-        );
+      trigger:
+        "#scroll-space",
 
-    },
+      start:
+        "top top",
 
-    onLeaveBack:()=>{
+      end:
+        "bottom bottom",
 
-        gsap.to(
-            "#scrollHint",
-            {
-                opacity:1,
-                duration:.4
-            }
-        );
+      scrub:
+        1.5
 
     }
 
-});
+  });
 
 
-/* =========================================================
-RESIZE
-========================================================= */
+/* =====================================================
+   1 — HERO
+===================================================== */
+
+timeline.to(
+  ".hero",
+  {
+    opacity: 0,
+    y: -80,
+    duration: 1
+  },
+  1
+);
+
+
+/* object grows */
+
+timeline.to(
+  object.scale,
+  {
+    x: 1.25,
+    y: 1.25,
+    z: 1.25,
+    duration: 1.2,
+    ease: "power2.inOut"
+  },
+  1
+);
+
+
+/* =====================================================
+   2 — BUILD
+===================================================== */
+
+timeline.to(
+  ".build",
+  {
+    opacity: 1,
+    y: 0,
+    duration: .8
+  },
+  1.2
+);
+
+
+/* sphere → cube */
+
+timeline.to(
+  sphere.scale,
+  {
+    x: .001,
+    y: .001,
+    z: .001,
+    duration: 1.2,
+    ease: "power3.inOut"
+  },
+  2
+);
+
+
+timeline.to(
+  cube.scale,
+  {
+    x: 1,
+    y: 1,
+    z: 1,
+    duration: 1.2,
+    ease: "power3.inOut"
+  },
+  2
+);
+
+
+/* fragments assemble */
+
+fragmentMeshes.forEach(
+  (mesh,i)=>{
+
+    timeline.to(
+      mesh.position,
+      {
+        x:
+          mesh.userData.home.x*.2,
+
+        y:
+          mesh.userData.home.y*.2,
+
+        z:
+          mesh.userData.home.z*.2,
+
+        duration:
+          1.2,
+
+        ease:
+          "power3.inOut"
+      },
+      1.7 + (i%10)*.015
+    );
+
+  }
+);
+
+
+/* =====================================================
+   3 — BREAK
+===================================================== */
+
+timeline.to(
+  ".build",
+  {
+    opacity: 0,
+    y: -60,
+    duration: .6
+  },
+  3.4
+);
+
+
+timeline.to(
+  ".break",
+  {
+    opacity: 1,
+    y: 0,
+    duration: .7
+  },
+  3.5
+);
+
+
+/* cube explodes */
+
+timeline.to(
+  cube.scale,
+  {
+    x: .001,
+    y: .001,
+    z: .001,
+    duration: .8,
+    ease: "power3.in"
+  },
+  4
+);
+
+
+/* knot appears */
+
+timeline.to(
+  knot.scale,
+  {
+    x: 1,
+    y: 1,
+    z: 1,
+    duration: 1,
+    ease: "back.out(1.5)"
+  },
+  4.1
+);
+
+
+/* fragments explode */
+
+fragmentMeshes.forEach(
+  (mesh,i)=>{
+
+    const direction =
+      mesh.userData.home
+        .clone()
+        .normalize();
+
+
+    timeline.to(
+      mesh.position,
+      {
+
+        x:
+          direction.x *
+          (5 + mesh.userData.random*4),
+
+        y:
+          direction.y *
+          (5 + mesh.userData.random*4),
+
+        z:
+          direction.z *
+          (5 + mesh.userData.random*4),
+
+        duration:
+          1.5,
+
+        ease:
+          "power3.out"
+
+      },
+      3.8
+    );
+
+  }
+);
+
+
+/* =====================================================
+   4 — EVOLVE
+===================================================== */
+
+timeline.to(
+  ".break",
+  {
+    opacity: 0,
+    y: -60,
+    duration: .6
+  },
+  5.1
+);
+
+
+timeline.to(
+  ".evolve",
+  {
+    opacity: 1,
+    y: 0,
+    duration: .7
+  },
+  5.2
+);
+
+
+/* knot → tetra */
+
+timeline.to(
+  knot.scale,
+  {
+    x: .001,
+    y: .001,
+    z: .001,
+    duration: .9,
+    ease: "power3.inOut"
+  },
+  5.7
+);
+
+
+timeline.to(
+  tetra.scale,
+  {
+    x: 1,
+    y: 1,
+    z: 1,
+    duration: 1.1,
+    ease: "power3.out"
+  },
+  5.8
+);
+
+
+/* =====================================================
+   5 — NO FIXED FORM
+===================================================== */
+
+timeline.to(
+  ".evolve",
+  {
+    opacity: 0,
+    y: -60,
+    duration: .6
+  },
+  6.9
+);
+
+
+timeline.to(
+  ".form",
+  {
+    opacity: 1,
+    y: 0,
+    duration: .7
+  },
+  7
+);
+
+
+/* entire environment expands */
+
+timeline.to(
+  universe.scale,
+  {
+    x: 1.7,
+    y: 1.7,
+    z: 1.7,
+    duration: 1.5,
+    ease: "power3.inOut"
+  },
+  7
+);
+
+
+/* tetra disappears */
+
+timeline.to(
+  tetra.scale,
+  {
+    x: .001,
+    y: .001,
+    z: .001,
+    duration: 1
+  },
+  7.5
+);
+
+
+/* sphere returns */
+
+timeline.to(
+  sphere.scale,
+  {
+    x: .7,
+    y: .7,
+    z: .7,
+    duration: 1
+  },
+  7.7
+);
+
+
+/* =====================================================
+   6 — PLAYZO
+===================================================== */
+
+timeline.to(
+  ".form",
+  {
+    opacity: 0,
+    y: -50,
+    duration: .6
+  },
+  8.5
+);
+
+
+timeline.to(
+  ".project",
+  {
+    opacity: 1,
+    scale: .8,
+    duration: .8
+  },
+  8.6
+);
+
+
+/* tiny project reveal */
+
+timeline.to(
+  ".project",
+  {
+    scale: 1,
+    duration: 1
+  },
+  9
+);
+
+
+/* camera approaches */
+
+timeline.to(
+  camera.position,
+  {
+    z: 5.5,
+    duration: 1.3,
+    ease: "power3.inOut"
+  },
+  9
+);
+
+
+/* =====================================================
+   7 — FUTURE
+===================================================== */
+
+timeline.to(
+  ".project",
+  {
+    opacity: 0,
+    scale: 1.15,
+    duration: .7
+  },
+  10.1
+);
+
+
+timeline.to(
+  camera.position,
+  {
+    z: 9,
+    duration: 1.2
+  },
+  10.1
+);
+
+
+timeline.to(
+  ".future",
+  {
+    opacity: 1,
+    y: 0,
+    duration: .8
+  },
+  10.2
+);
+
+
+/* restore fragments */
+
+fragmentMeshes.forEach(
+  (mesh,i)=>{
+
+    const target =
+      mesh.userData.home;
+
+
+    timeline.to(
+      mesh.position,
+      {
+        x: target.x,
+        y: target.y,
+        z: target.z,
+        duration: 1.4,
+        ease: "power3.out"
+      },
+      10.2
+    );
+
+  }
+);
+
+
+/* =====================================================
+   8 — FINAL
+===================================================== */
+
+timeline.to(
+  ".future",
+  {
+    opacity: 0,
+    y: -70,
+    duration: .7
+  },
+  11.5
+);
+
+
+timeline.to(
+  ".final",
+  {
+    opacity: 1,
+    y: 0,
+    duration: 1
+  },
+  11.6
+);
+
+
+/* final world settles */
+
+timeline.to(
+  universe.scale,
+  {
+    x: 1,
+    y: 1,
+    z: 1,
+    duration: 1.4,
+    ease: "power3.inOut"
+  },
+  11.5
+);
+
+
+/* =====================================================
+   PROGRESS
+===================================================== */
+
+gsap.to(
+  ".progress-fill",
+  {
+    height: "100%",
+
+    ease: "none",
+
+    scrollTrigger: {
+
+      trigger:
+        "#scroll-space",
+
+      start:
+        "top top",
+
+      end:
+        "bottom bottom",
+
+      scrub:
+        true
+
+    }
+  }
+);
+
+
+/* =====================================================
+   RESIZE
+===================================================== */
 
 window.addEventListener(
-    "resize",
-    ()=>{
+  "resize",
+  () => {
 
-        camera.aspect=
-        innerWidth/
-        innerHeight;
+    camera.aspect =
+      window.innerWidth /
+      window.innerHeight;
 
-        camera.updateProjectionMatrix();
+    camera.updateProjectionMatrix();
 
-        renderer.setSize(
-            innerWidth,
-            innerHeight
-        );
 
-        renderer.setPixelRatio(
-            Math.min(
-                devicePixelRatio,
-                2
-            )
-        );
+    renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    );
 
-    }
+  }
 );
 
 </script>
