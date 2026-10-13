@@ -1,426 +1,160 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>STRIPZO Preview</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <style>
-    :root {
-      --bg: #020203;
-      --fg: #f8fafc;
-      --muted: #64748b;
-      --accent-glow: rgba(255, 255, 255, 0.05);
-      --border: rgba(255, 255, 255, 0.08);
-      --font-display: 'Syne', sans-serif;
-      --font-sans: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-    html, body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: var(--font-sans);
-      overflow-x: hidden;
-      width: 100vw;
-      height: 100vh;
-      cursor: none;
-    }
-
-    #cursor-dot {
-      position: fixed; top: 0; left: 0;
-      width: 6px; height: 6px;
-      background: var(--fg);
-      border-radius: 50%;
-      pointer-events: none; z-index: 9999;
-      transform: translate(-50%, -50%);
-    }
-
-    #cursor-ring {
-      position: fixed; top: 0; left: 0;
-      width: 42px; height: 42px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      border-radius: 50%;
-      pointer-events: none; z-index: 9998;
-      transform: translate(-50%, -50%);
-      transition: transform 0.15s ease-out;
-    }
-
-    #webgl-stage {
-      position: fixed; top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 1; pointer-events: none;
-    }
-
-    .hairline-v {
-      position: fixed; top: 0; bottom: 0;
-      width: 1px; background: var(--border);
-      z-index: 2; pointer-events: none;
-    }
-    .line-left { left: 8vw; }
-    .line-right { right: 8vw; }
-
-    .header {
-      position: fixed; top: 0; left: 0;
-      width: 100vw; padding: 40px 8vw;
-      display: flex; justify-content: space-between; align-items: center;
-      z-index: 100; mix-blend-mode: difference;
-    }
-
-    .brand-mark {
-      font-family: var(--font-display);
-      font-weight: 800; font-size: 1.1rem;
-      letter-spacing: 0.4em; text-transform: uppercase;
-      color: #ffffff;
-    }
-
-    .status-badge {
-      font-size: 0.7rem; font-weight: 300;
-      letter-spacing: 0.25em; color: var(--muted);
-      text-transform: uppercase; display: flex;
-      align-items: center; gap: 12px;
-    }
-
-    .status-dot {
-      width: 5px; height: 5px;
-      background: #ffffff; border-radius: 50%;
-      box-shadow: 0 0 10px rgba(255,255,255,0.9);
-    }
-
-    #viewport { position: relative; z-index: 10; width: 100%; }
-
-    .stage-section {
-      min-height: 100vh; width: 100%;
-      display: flex; flex-direction: column;
-      justify-content: center; padding: 0 12vw;
-      position: relative;
-    }
-
-    .label-meta {
-      font-size: 0.7rem; font-weight: 400;
-      letter-spacing: 0.3em; color: var(--muted);
-      text-transform: uppercase; margin-bottom: 24px;
-      display: flex; align-items: center; gap: 16px;
-    }
-
-    .label-meta::before {
-      content: ''; width: 24px; height: 1px;
-      background: var(--muted);
-    }
-
-    .monolith-heading {
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: clamp(3rem, 9vw, 8.5rem);
-      line-height: 0.9;
-      letter-spacing: -0.03em;
-      color: var(--fg);
-      text-transform: uppercase;
-      margin-bottom: 32px;
-    }
-
-    .editorial-copy {
-      font-size: clamp(1.1rem, 1.8vw, 1.6rem);
-      font-weight: 200; line-height: 1.5;
-      max-width: 640px; color: #94a3b8;
-      letter-spacing: -0.01em;
-    }
-
-    .artifact-card {
-      background: rgba(255, 255, 255, 0.015);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      padding: 48px; max-width: 520px;
-      margin-top: 24px; border-radius: 2px;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-      position: relative;
-      transition: border-color 0.5s;
-    }
-
-    .artifact-card:hover {
-      border-color: rgba(255, 255, 255, 0.35);
-    }
-
-    .artifact-title {
-      font-family: var(--font-display);
-      font-size: 2.2rem; font-weight: 700;
-      margin-bottom: 12px;
-    }
-
-    .artifact-sub {
-      font-size: 0.85rem; color: var(--muted);
-      line-height: 1.6; font-weight: 300;
-    }
-
-    /* High-Fi Executive Founder Profile Card */
-    .founder-profile-card {
-      margin-top: 40px;
-      padding: 28px 32px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 4px;
-      max-width: 480px;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      position: relative;
-      transition: all 0.4s ease;
-    }
-
-    .founder-profile-card:hover {
-      border-color: rgba(255, 255, 255, 0.25);
-      background: rgba(255, 255, 255, 0.035);
-      transform: translateY(-2px);
-    }
-
-    .founder-avatar-frame {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .founder-avatar-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: #ffffff;
-      letter-spacing: 0.05em;
-    }
-
-    .founder-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .founder-role-tag {
-      font-size: 0.65rem;
-      letter-spacing: 0.3em;
-      color: var(--muted);
-      text-transform: uppercase;
-      font-weight: 500;
-    }
-
-    .founder-name {
-      font-family: var(--font-display);
-      font-size: 1.4rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      color: #ffffff;
-      text-transform: uppercase;
-    }
-
-    .founder-desc {
-      font-size: 0.78rem;
-      color: #94a3b8;
-      font-weight: 300;
-      letter-spacing: 0.02em;
-    }
-
-    .footer-nav {
-      position: fixed; bottom: 40px; right: 8vw;
-      font-size: 0.65rem; letter-spacing: 0.3em;
-      color: var(--muted); text-transform: uppercase;
-      z-index: 100; mix-blend-mode: difference;
-    }
-
-    @media (max-width: 768px) {
-      .header { padding: 24px 6vw; }
-      .stage-section { padding: 0 8vw; }
-      .line-left, .line-right { display: none; }
-      .artifact-card, .founder-profile-card { padding: 24px; }
-    }
-  </style>
+<meta charset="utf-8">
+<title>game</title>
+<style>
+	html, body { margin: 0; height: 100%; background: #000; color: #ccc; font: 12px monospace; overflow: hidden; }
+	#canvas { display: block; position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; background: #000; }
+	@font-face { font-family: 'Chalet'; src: url('/b/8b0b5899ed/title/chalet.woff') format('woff'); }
+	#loading { position: fixed; inset: 0; background: #000; overflow: hidden; transition: opacity .8s; z-index: 5; }
+	#loading.done { opacity: 0; pointer-events: none; }
+	#ls-stage { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; overflow: hidden; font: 12px Chalet, sans-serif; color: #fff; }
+	#ls-screens { position: absolute; inset: 0; }
+	.ls-screen { position: absolute; inset: 0; }
+	.ls-cam { position: absolute; inset: 0; perspective: 1229px; perspective-origin: 640px 360px; }
+	.ls-layer { position: absolute; left: 0; top: 0; transform-origin: 0 0; background-size: 100% 100%; }
+	#ls-logo { position: absolute; left: 95px; top: 492.5px; width: 186px; height: 186px; }
+	#ls-bars { position: absolute; right: 96px; top: 642px; display: flex; gap: 3px; }
+	.ls-bar { height: 24px; padding: 0 6px; display: flex; align-items: center; background: rgba(0, 0, 0, .706); border-radius: 2.4px; white-space: nowrap; }
+	#modes { gap: 8px; }
+	#modes button { display: flex; align-items: center; height: 24px; padding: 0; border: 0; background: none; color: #fff; font: 12px Chalet, sans-serif; cursor: pointer; }
+	#modes button:disabled { cursor: default; }
+	#modes button[hidden] { display: none; }
+	#modes.ask button:not(:disabled) .ls-key { animation: ls-ask 1.2s ease-in-out infinite; }
+	@keyframes ls-ask { 50% { opacity: .35; } }
+	.ls-key { margin-left: 4px; min-width: 12px; height: 15px; padding: 0 4px; line-height: 16px; border-radius: 2px; background: #fff; color: #000; font-size: 10px; text-transform: uppercase; }
+	.ls-spin { flex: none; width: 22px; height: 22px; margin-left: 2px; background: url('/b/8b0b5899ed/title/spinner.png') center / 24px 24px no-repeat; animation: ls-spin 2s steps(60) infinite; }
+	@keyframes ls-spin { from { transform: rotate(0deg) scaleX(-1); } to { transform: rotate(-360deg) scaleX(-1); } }
+	#label { text-shadow: .85px .85px 1px rgba(0, 0, 0, .45); }
+	#pct { margin-left: 15px; font-variant-numeric: tabular-nums; }
+	#ls-log { position: absolute; left: 8px; right: 8px; bottom: 6px; display: flex; flex-direction: column; align-items: center; font: 10px/1.35 Consolas, monospace; color: rgba(190, 190, 190, .75); text-shadow: 0 0 2px #000, 1px 1px 1px #000; white-space: pre; pointer-events: none; }
+	#console { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+	#data { color: #6a9; }
+	#bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .08); }
+	#fill { height: 100%; width: 0; background: #7cc576; }
+	#hud { position: fixed; left: 8px; bottom: 8px; max-width: 60vw; white-space: pre-wrap; opacity: .8; pointer-events: none; }
+	#fps { position: fixed; left: 8px; top: 6px; display: none; color: #0f0; font: bold 18px/1.2 Consolas, monospace; font-variant-numeric: tabular-nums; text-shadow: 1px 1px 2px #000, 0 0 3px #000; pointer-events: none; z-index: 10; }
+</style>
 </head>
 <body>
-
-  <div id="cursor-dot"></div>
-  <div id="cursor-ring"></div>
-
-  <div id="webgl-stage"></div>
-
-  <div class="hairline-v line-left"></div>
-  <div class="hairline-v line-right"></div>
-
-  <header class="header">
-    <div class="brand-mark">STRIPZO</div>
-    <div class="status-badge">
-      <div class="status-dot"></div>
-      <span id="state-index">01 / ORIGIN</span>
-    </div>
-  </header>
-
-  <main id="viewport">
-
-    <section class="stage-section" id="sec-1">
-      <div class="label-meta">ORGANISATION IDENTITY</div>
-      <h1 class="monolith-heading">Building<br>What Comes Next.</h1>
-      <p class="editorial-copy">
-        STRIPZO is an independent technology and digital-products organisation constructing custom platforms, interfaces, and experiences.
-      </p>
-    </section>
-
-    <section class="stage-section" id="sec-2">
-      <div class="label-meta">PHILOSOPHY & PURPOSE</div>
-      <h2 class="monolith-heading">Formed From<br>Scratch.</h2>
-      <p class="editorial-copy">
-        Unconventional thinking paired with absolute execution discipline. We create digital platforms designed as living environments.
-      </p>
-    </section>
-
-    <section class="stage-section" id="sec-3">
-      <div class="label-meta">ACTIVE EXPERIMENT</div>
-      <div class="artifact-card">
-        <div class="label-meta" style="margin-bottom: 12px;">ARTIFACT 001</div>
-        <div class="artifact-title">PLAYZO</div>
-        <div class="artifact-sub">
-          A high-performance browser gaming platform built to test instant web graphics delivery and zero-friction digital play.
-        </div>
-      </div>
-    </section>
-
-    <section class="stage-section" id="sec-4">
-      <div class="label-meta">ARCHITECTURE & LEADERSHIP</div>
-      <h2 class="monolith-heading">Constant<br>Evolution.</h2>
-      <p class="editorial-copy">
-        An ecosystem continuously expanding into new fields, mediums, and tech vectors.
-      </p>
-
-      <!-- Executive High-Fi Founder Card -->
-      <div class="founder-profile-card">
-        <div class="founder-avatar-frame">
-          <div class="founder-avatar-inner">Y</div>
-        </div>
-        <div class="founder-meta">
-          <div class="founder-role-tag">FOUNDED BY</div>
-          <div class="founder-name">YASHAS</div>
-          <div class="founder-desc">Principal Architect & Chief Technologist</div>
-        </div>
-      </div>
-
-    </section>
-
-  </main>
-
-  <div class="footer-nav">SCROLL TO TRANSITION</div>
-
-  <script>
-    const dot = document.getElementById('cursor-dot');
-    const ring = document.getElementById('cursor-ring');
-
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let ringX = mouseX;
-    let ringY = mouseY;
-
-    window.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      dot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
-    });
-
-    function renderCursor() {
-      ringX += (mouseX - ringX) * 0.15;
-      ringY += (mouseY - ringY) * 0.15;
-      ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
-      requestAnimationFrame(renderCursor);
-    }
-    renderCursor();
-
-    const container = document.getElementById('webgl-stage');
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x020203, 0.025);
-
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 8;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
-
-    const geometry = new THREE.TorusKnotGeometry(1.8, 0.45, 128, 32, 2, 3);
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.1
-    });
-
-    const structure = new THREE.Mesh(geometry, material);
-    scene.add(structure);
-
-    const coreGeo = new THREE.IcosahedronGeometry(1.2, 2);
-    const coreMat = new THREE.MeshBasicMaterial({
-      color: 0x64748b,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.06
-    });
-    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
-    scene.add(coreMesh);
-
-    let clock = new THREE.Clock();
-
-    function render() {
-      requestAnimationFrame(render);
-      const time = clock.getElapsedTime();
-
-      structure.rotation.x = time * 0.06;
-      structure.rotation.y = time * 0.09;
-      coreMesh.rotation.y = -time * 0.05;
-
-      renderer.render(scene, camera);
-    }
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    render();
-
-    const stateLabel = document.getElementById('state-index');
-    const states = [
-      { name: '01 / ORIGIN', scale: 1, opacity: 0.1 },
-      { name: '02 / PHILOSOPHY', scale: 1.35, opacity: 0.14 },
-      { name: '03 / PLAYZO', scale: 0.85, opacity: 0.06 },
-      { name: '04 / EVOLUTION', scale: 1.5, opacity: 0.18 }
-    ];
-
-    window.addEventListener('scroll', () => {
-      const scrollY = window.scrollY;
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = Math.min(Math.max(scrollY / (maxScroll || 1), 0), 1);
-
-      const stateIndex = Math.min(Math.floor(progress * states.length), states.length - 1);
-      const currentState = states[stateIndex];
-
-      stateLabel.innerText = currentState.name;
-      structure.scale.set(currentState.scale, currentState.scale, currentState.scale);
-      material.opacity = currentState.opacity;
-    });
-  </script>
-</body>
-</html>
+<canvas id="canvas" width="800" height="600" tabindex="-1"></canvas>
+<div id="hud"></div>
+<div id="loading"><div id="ls-stage"><div id="ls-screens"></div><img id="ls-logo" src="/b/8b0b5899ed/title/logo.png" alt=""><div id="ls-bars"><div id="modes" class="ls-bar"><button data-act="back"></button><button data-act="map5"></button><button data-act="map6"></button><button data-act="sandbox"></button><button data-act="story"></button></div><div class="ls-bar"><span id="label">Starting...</span><span id="pct">0%</span><i class="ls-spin"></i></div></div></div><div id="ls-log"><div id="data"></div><div id="console"></div></div><div id="bar"><div id="fill"></div></div></div>
+<div id="fps"></div>
+<script type="module">
+const q = new URLSearchParams(location.search);
+const BASE = '/b/8b0b5899ed'.charAt(0) === '_' ? '' : '/b/8b0b5899ed';
+const remoteLog = q.get('log') === '1';
+const postLog = (text) => { if (remoteLog) fetch('/log', { method: 'POST', body: text }).catch(() => {}); };
+{
+	let posted = 0;
+	new BroadcastChannel('game-crash').onmessage = (ev) => {
+		const m = ev.data;
+		const memory = /memory|OOM|Aborted\(|RangeError|grow/i.test(m.text);
+		const dev = ' deviceMemory ' + (navigator.deviceMemory || '?') + ' GB, cores ' + navigator.hardwareConcurrency;
+		if (remoteLog && posted++ < 3) fetch('/log', { method: 'POST', body: '[page] CRASH (' + m.kind + ', ' + m.thread + ' thread, wasm heap ' + m.heap + ' MB,' + dev + ', ' + location.search + '): ' + m.text + '\n' + m.tail.join('\n') + '\n' }).catch(() => {});
+		const el = document.getElementById('hud');
+		if (el) { el.textContent = 'The game stopped (' + m.kind + '): ' + m.text.split('\n')[0].slice(0, 200) + (memory ? ' - this looks like a lack of memory: close other tabs and reload.' : ' - reload the page.'); el.style.color = '#f96'; }
+	};
+}
+let stopTitle = () => {};
+{
+	const stage = document.getElementById('ls-stage'), holder = document.getElementById('ls-screens');
+	const fit = () => {
+		const s = Math.min(innerWidth / 1280, innerHeight / 720);
+		stage.style.transform = 'translate(' + (innerWidth - 1280 * s) / 2 + 'px,' + (innerHeight - 720 * s) / 2 + 'px) scale(' + s + ')';
+	};
+	fit();
+	addEventListener('resize', fit);
+	const L = (tex, w, h, x, y, yr, to) => ({ tex, w, h, x, y, yr, to });
+	const BG = (n, yr, to, x = 98) => L('ls' + n + '_background', 1024, 512, x, 95, yr, to);
+	const FG = (n, name, w, h, x, y, toX, yr = 0) => L('ls' + n + '_' + name, w, h, x, y, yr, { x: toX });
+	const SCREENS = [
+		[L('beach_bg', 1024, 512, 98, 95, 20, { yr: -6, xr: 5 }), L('beach_fg', 343, 629, 480, 95, 0, { x: 720 })],
+		null,
+		[BG(0, 7, { yr: -7 }), FG(0, 'foreground', 299, 599, 360, 140, 560, 7)],
+		[BG(1, 6, { yr: -12 }), FG(1, 'foreground', 503, 206, 300, 465, 480), FG(1, 'foreground_franklin', 368, 588, 440, 140, 745)],
+		[BG(2, 7, { yr: -5, xr: 5 }), FG(2, 'foreground', 311, 558, 745, 200, 450), FG(2, 'foreground_chop', 320, 512, 640, 260, 310)],
+		[BG(3, 12, { yr: -4 }, 110), FG(3, 'foreground', 412, 609, 440, 120, 730)],
+		[BG(4, 7, { yr: -4, xr: 5 }), FG(4, 'foreground', 251, 643, 400, 85, 250)],
+		[BG(5, 7, { yr: -6 }), FG(5, 'foreground', 389, 640, 450, 95, 700)],
+		[BG(6, 7, { yr: 0, xr: 5 }), FG(6, 'foreground', 367, 603, 410, 115, 800)],
+		[BG(7, 6, { yr: -6, xr: 5 }), FG(7, 'foreground', 311, 625, 860, 95, 520)],
+		[BG(8, 7, { yr: -5, xr: 5 }), FG(8, 'foreground', 492, 497, 400, 190, 660)],
+		[BG(9, 7, { yr: -3, xr: 5 }), FG(9, 'foreground', 331, 675, 220, 50, 140)],
+		[BG(10, 6, { yr: -5, xr: 5 }), FG(10, 'foreground', 352, 682, 545, 65, 485)],
+		[BG(11, 7, { yr: -3, xr: 5 }), FG(11, 'foreground', 344, 669, 309, 51, 424)],
+		[BG(12, 6, { yr: -4 }), FG(12, 'foreground_michael', 462, 677, 345, 42, 220)],
+		[BG(13, 5, { yr: -6, xr: 5 }), FG(13, 'foreground', 399, 681, 430, 39, 250)],
+		[BG(14, 6, { yr: -2, xr: 5 }), FG(14, 'foreground', 392, 631, 650, 95, 850)],
+		[BG(15, 6, { yr: -3, xr: 5 }), FG(15, 'foreground', 385, 642, 404, 78, 261)],
+		[BG(16, 6, { yr: -3, xr: 5 }), FG(16, 'foreground', 300, 600, 300, 150, 400)],
+	];
+	const ORDERS = [[0, 16, 18, 3, 12, 2, 17, 10, 9, 8, 15, 6, 11, 14, 4, 7, 13], [0, 4, 6, 17, 11, 16, 18, 7, 9, 15, 3, 14, 10, 13, 2, 8, 12],
+		[0, 7, 16, 14, 13, 3, 10, 2, 15, 18, 8, 9, 4, 17, 12, 6, 11], [0, 8, 18, 9, 13, 4, 11, 14, 7, 17, 6, 12, 3, 16, 2, 15, 10],
+		[0, 11, 12, 7, 18, 14, 9, 13, 4, 2, 15, 11, 8, 16, 6, 3, 17], [0, 10, 16, 2, 13, 17, 8, 9, 18, 3, 12, 6, 7, 4, 14, 15, 10]];
+	const order = ORDERS[Math.floor(Math.random() * ORDERS.length)];
+	const cubicInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(2 - 2 * t, 3) / 2);
+	const slide = (s, x) => {
+		s.el.style.transform = 'translateX(' + x + 'px)';
+		for (const c of s.cams) c.style.perspectiveOrigin = (640 - x) + 'px 360px';
+	};
+	const place = (l, x, yr, xr) => { l.el.style.transform = 'translate3d(' + x + 'px,' + l.y + 'px,0) rotateY(' + -yr + 'deg) rotateX(' + -xr + 'deg)'; };
+	const prepare = (i) => {
+		const layers = SCREENS[order[i]].map((d) => ({ ...d, img: Object.assign(new Image(), { src: '/b/8b0b5899ed/title/art/' + d.tex + '.webp' }) }));
+		return Promise.all(layers.map((l) => l.img.decode().catch(() => {}))).then(() => layers);
+	};
+	let active = null, leaving = null, index = 0, alt = -1, timer = 0, raf = 0, stopped = false;
+	const show = (defs) => {
+		const now = performance.now();
+		alt = alt <= 0 ? 1 : -1;
+		const el = document.createElement('div');
+		el.className = 'ls-screen';
+		const cams = [];
+		const s = { el, slideFrom: alt * 1280, start: now, settled: 0, cams, layers: defs.map((d) => {
+			const cam = document.createElement('div'), e = document.createElement('div');
+			cam.className = 'ls-cam';
+			e.className = 'ls-layer';
+			e.style.width = d.w + 'px'; e.style.height = d.h + 'px';
+			e.style.backgroundImage = 'url(' + d.img.src + ')';
+			cam.appendChild(e);
+			el.appendChild(cam);
+			cams.push(cam);
+			return { el: e, y: d.y, x0: d.x, yr0: d.yr, xr0: 0, x1: d.to.x ?? d.x, yr1: d.to.yr ?? d.yr, xr1: d.to.xr ?? 0 };
+		}) };
+		for (const l of s.layers) place(l, l.x0, l.yr0, l.xr0);
+		slide(s, s.slideFrom);
+		holder.appendChild(el);
+		if (leaving) leaving.el.remove();
+		leaving = active;
+		if (leaving) { leaving.slideFrom = 0; leaving.slideTo = -alt * 1280; leaving.start = now; }
+		active = s;
+		s.slideTo = 0;
+	};
+	const tick = (now) => {
+		for (const s of [leaving, active]) {
+			if (!s) continue;
+			const p = Math.min(1, (now - s.start) / 850);
+			if (p < 1 || !s.slid) { slide(s, s.slideFrom + (s.slideTo - s.slideFrom) * cubicInOut(p)); s.slid = p === 1; }
+			if (s === active && p === 1 && !s.settled) s.settled = now;
+			if (s.settled) {
+				const q = Math.min(1, (now - s.settled) / 42000);
+				for (const l of s.layers) place(l, l.x0 + (l.x1 - l.x0) * q, l.yr0 + (l.yr1 - l.yr0) * q, l.xr0 + (l.xr1 - l.xr0) * q);
+			}
+			if (s === leaving && p === 1) { s.el.remove(); leaving = null; }
+		}
+		if (!stopped) raf = requestAnimationFrame(tick);
+	};
+	let next = prepare(0);
+	const cycle = () => next.then((defs) => {
+		if (stopped) return;
+		show(defs);
+		index = (index + 1) % order.length;
+		next = prepare(index);
+		timer = setTimeout(cycle, 14000);
+	});
+	timer = setTimeout(cycle, 500);
+	raf = requestAnimationFrame(tick);
+	stopTitle = () => { stopped = true; clearTimeout(timer); cancelAnimationFrame(raf); };
+}
